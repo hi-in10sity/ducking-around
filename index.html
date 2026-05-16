@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Ducking Around</title>
+	<link rel="icon" type="image/x-icon" href="cursor.png">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div class="screen active" id="screen-menu">
+		<div class="menu">
+			<div class="menu-content">
+				<h1 class="text-center">DUCKING <br> AROUND <span>🐣</span></h1>
+				<button class="menu-btn text-center mt-5" onclick="playAudio();startGame()">START</button>
+				<button class="menu-btn text-center" onclick="playAudio();showRules()">RULES</button>
+				<button class="menu-btn text-center" onclick="playAudio();showDucks()">DUCKS</button>
+			</div>
+		</div>
+		<div class="menu-side">
+			<div id="menuOptions">
+				<div class="setup-section">
+					<h3>👥 Number of Players</h3>
+					<div class="option-row" id="player-count-opts">
+						<div class="opt-card selected" data-count="2" onclick="playAudio();selectCount(2)"><h4>2 Players</h4><p>Intense (?) duel!</p></div>
+						<div class="opt-card" data-count="3" onclick="playAudio();selectCount(3)"><h4>3 Players</h4><p>Triple threat!</p></div>
+						<div class="opt-card" data-count="4" onclick="playAudio();selectCount(4)"><h4>4 Players</h4><p>Full chaos!</p></div>
+					</div>
+				</div>
+				<div class="setup-section">
+					<h3>🤖 AI Opponent</h3>
+					<div class="option-row" id="ai-opts">
+						<div class="opt-card selected" data-ai="none" onclick="playAudio();selectAI('none')"><h4>No AI</h4><p>All human players</p></div>
+						<div class="opt-card" data-ai="1" onclick="playAudio();selectAI('1')"><h4>1 AI Duck</h4><p><span class="opt-badge">BOT</span></p></div>
+						<div class="opt-card" data-ai="2" onclick="playAudio();selectAI('2')"><h4>2 AI Ducks</h4><p><span class="opt-badge">BOT</span></p></div>
+					</div>
+				</div>
+				<div class="setup-section">
+					<h3>⚡ Game Mode</h3>
+					<div class="option-row" id="mode-opts">
+						<div class="opt-card selected" data-mode="standard" onclick="playAudio();selectMode('standard')"><h4>Standard</h4><p>16 HP, balanced</p></div>
+						<div class="opt-card" data-mode="blitz" onclick="playAudio();selectMode('blitz')"><h4>Blitz</h4><p>8 HP, fast-paced</p></div>
+						<div class="opt-card" data-mode="endurance" onclick="playAudio();selectMode('endurance')"><h4>Endurance</h4><p>24 HP, long battle</p></div>
+					</div>
+				</div>
+				<div class="setup-section">
+					<h3>🌐 Online Multiplayer (Room Codes)</h3>
+					<div id="online-lobby-area">
+						<div style="margin-bottom:15px">
+							<label style="font-size:12px;font-weight:900;color:var(--ink3)">YOUR DUCK NAME:</label>
+							<div style="display:flex;gap:8px">
+								<input class="lobby-input" id="global-player-name" placeholder="QUACKY..." maxlength="12" style="margin-bottom:0">
+								<button class="lobby-btn" onclick="playAudio();syncNameChange()" style="background:var(--pencil2);padding:5px 15px;flex-shrink:0">✔️</button>
+							</div>
+						</div>
+						<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+							<button class="lobby-btn lobby-btn-create" onclick="playAudio();createRoom()" style="flex:1">🏠 Create Room</button>
+							<button class="lobby-btn lobby-btn-join" onclick="playAudio();showJoinUI()" style="flex:1">🔗 Join Room</button>
+						</div>
+						<div id="join-ui" style="display:none;margin-bottom:10px">
+							<input class="lobby-input" id="join-code-input" placeholder="ENTER CODE" maxlength="6" oninput="this.value=this.value.toUpperCase()">
+							<button class="lobby-btn lobby-btn-join" onclick="playAudio();joinRoom()">JOIN</button>
+						</div>
+						<div id="room-display" style="display:none">
+							<div style="font-size:13px;color:var(--ink3);margin-bottom:4px">Share your code with friends:</div>
+							<div class="room-code-display" id="room-code-text">------</div>
+							<div id="lobby-players-list" class="lobby-players-list"></div>
+							<button class="lobby-btn lobby-btn-create" id="start-room-btn" onclick="playAudio();startRoomGame()" style="display:none">🎮 Start Game (Host)</button>
+						</div>
+						<div class="lobby-status" id="lobby-status"></div>
+						<div class="online-notice">* Online multiplayer via Firebase. Share code with friends!</div>
+					</div>
+				</div>
+				<button class="start-btn" onclick="playAudio();validateAndStart()">🎲 WHO ARE OUR HEROES?</button>
+			</div>
+
+			<div id="menuRules">
+				<div class="rules-page active" id="rules-page-1">
+					<div class="soo-explain-grid">
+						<div class="squad-container">
+							<div class="tape-piece">DUCK SQUAD</div>
+							<div class="duck-card a-card mt-3"><span class="sticker">A</span><h3>Big Blue</h3><p>"ALL ducks are cool!"</p><span class="badge">Universal +</span></div>
+							<div class="duck-card e-card mt-3"><span class="sticker">E</span><h3>Big Red</h3><p>"NO ducks are cool!"</p><span class="badge">Universal -</span></div>
+							<div class="duck-card i-card"><span class="sticker">I</span><h3>Little Blue</h3><p style="font-size:0.95rem">"Some ducks ARE cool!"</p><span class="badge">Particular +</span></div>
+							<div class="duck-card o-card"><span class="sticker">O</span><h3>Little Red</h3><p style="font-size:0.95rem">"Some ducks AREN'T cool!"</p><span class="badge">Particular -</span></div>
+						</div>
+						<div class="battle-tape">
+							<div class="tape-piece" id="cheatTape">CHEAT SHEET</div>
+							<ul class="cheat-sheet">
+								<li><span class="emoji">💥</span> <b>TOTAL RIVALS:</b> A vs O, E vs I! Opposites!</li>
+								<li><span class="emoji">🥊</span> <b>BOSS FIGHT:</b> Big Ducks <i>CAN'T</i> both be right!</li>
+								<li><span class="emoji">😎</span> <b>CHILL ZONE:</b> Little Ducks <i>CAN</i> both be right!</li>
+								<li><span class="emoji">🎢</span> <b>TRUTH SLIDE:</b> If Big is right, Little is too!</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="rules-page" id="rules-page-2">
+					<div class="tape-piece mt-5">🃏 ABILITIES</div>
+					<div style="text-align:center; font-size:1rem; font-weight: 700; color:var(--ink3);" class="mt-2">Draw these from Ability tiles or Choice tiles. Use wisely — they can flip the game!</div>
+					<div class="ability-guide-grid">
+						<div class="ability-guide-card" style="border-color:#b8860b">
+							<span class="ab-badge" style="background:#f4e04d">Mobility</span>
+							<span class="ab-emoji">🐥</span>
+							<div class="ab-name">Warp Wings</div>
+							<div class="ab-effect">Your next dice roll counts DOUBLE. Land twice as far on the board!</div>
+							<div class="ab-tip">💡 Best used to sprint past a dangerous tile or race to GO for +1 HP.</div>
+						</div>
+						<div class="ability-guide-card" style="border-color:#1a4f8a">
+							<span class="ab-badge" style="background:#deeaf7;color:#1a4f8a">Lifesteal</span>
+							<span class="ab-emoji">💧</span>
+							<div class="ab-name">Quack Drain</div>
+							<div class="ab-effect">Steal 2 HP from a chosen opponent immediately.</div>
+							<div class="ab-tip">💡 Deadly on a low-HP target. Can trigger an elimination at the right moment.</div>
+						</div>
+						<div class="ability-guide-card" style="border-color:#1a6b3c">
+							<span class="ab-badge" style="background:#d4f7d4;color:#1a6b3c">Escape</span>
+							<span class="ab-emoji">🍃</span>
+							<div class="ab-name">Feather Dodge</div>
+							<div class="ab-effect">Your next Combat tile is completely ignored.</div>
+							<div class="ab-tip">💡 Save it when you're low and can't afford to lose a duel.</div>
+						</div>
+						<div class="ability-guide-card" style="border-color:#1a6b3c">
+							<span class="ab-badge" style="background:#d4f7d4;color:#1a6b3c">Heal</span>
+							<span class="ab-emoji">💚</span>
+							<div class="ab-name">Healing Splash</div>
+							<div class="ab-effect">Instantly restore 5 HP! With low HP modes, that's nearly half your health.</div>
+							<div class="ab-tip">💡 The most powerful card in Blitz mode (8 HP total). Use ASAP if critical.</div>
+						</div>
+						<div class="ability-guide-card" style="border-color:#2a7ab5">
+							<span class="ab-badge" style="background:#deeaf7;color:#2a7ab5">Defense</span>
+							<span class="ab-emoji">🛁</span>
+							<div class="ab-name">Bubble Armor</div>
+							<div class="ab-effect">The next hit you receive is completely blocked—zero damage, no matter the amount.</div>
+							<div class="ab-tip">💡 Use before entering a Combat tile you can't avoid.</div>
+						</div>
+						<div class="ability-guide-card" style="border-color:#8b1a7a">
+							<span class="ab-badge" style="background:#ecdff7;color:#8b1a7a">Teleport</span>
+							<span class="ab-emoji">🌀</span>
+							<div class="ab-name">Quack-Port</div>
+							<div class="ab-effect">Warp instantly to Tile 0 (GO!) and earn +1 HP as a bonus for the trip.</div>
+							<div class="ab-tip">💡 Great escape hatch when you're deep in enemy territory with bad tiles ahead.</div>
+						</div>
+						<div class="ability-guide-card" style="border-color:#c0392b">
+							<span class="ab-badge" style="background:#ffe8e8;color:#c0392b">Control</span>
+							<span class="ab-emoji">❄️</span>
+							<div class="ab-name">Freeze Tag</div>
+							<div class="ab-effect">Target player skips their entire next turn.</div>
+							<div class="ab-tip">💡 Use on a dangerous player right before they'd land on an ability or combat tile.</div>
+						</div>
+						<div class="ability-guide-card" style="border-color:#5b2d8e">
+							<span class="ab-badge" style="background:#ecdff7;color:#5b2d8e">Counter</span>
+							<span class="ab-emoji">🪞</span>
+							<div class="ab-name">Mirror Shield</div>
+							<div class="ab-effect">The next attack aimed at you is reflected BACK at the attacker instead.</div>
+							<div class="ab-tip">💡 Equip when you suspect someone will target you with a Hard/Extreme combo.</div>
+						</div>
+					</div>
+				</div>
+				<div class="rules-pager">
+					<button class="rules-page-btn active" id="rules-pg-1" onclick="playAudio();switchRulesPage(1)">1</button>
+					<span style="color:var(--ink3)">of</span>
+					<button class="rules-page-btn" id="rules-pg-2" onclick="playAudio();switchRulesPage(2)">2</button>
+				</div>
+			</div>
+
+			<div id="menuDucks">
+				<div class="squad-container">
+					<div class="tape-piece">DUCK HEROES (ART SOON!)</div>
+					<div class="hero-card mc-card"><span class="sticker">D2</span><div class="img-frame"><img src="duckdash.png"></div><h3 class="hero-name">DuckDash</h3><div class="stats"><span><b>♾️ Quick Feet:</b> Move +/- 1 tile after roll.</span><span class="active-skill"><b>⚡ Speed Burst:</b> Extra move phase! (Cannot attack.)</span></div></div>
+					<div class="hero-card waterfowl-card"><span class="sticker">WF</span><div class="img-frame"><img src="waterfowl.png"></div><h3 class="hero-name">Waterfowl</h3><div class="stats"><span><b>♾️ Soaked Mind:</b> No EXTREME attacks on Waterfowl.</span><span class="active-skill"><b>⚡ Splash Attack:</b> Enemy's next fail = +1 DMG.</span></div></div>
+					<div class="hero-card mibibe-card"><span class="sticker">MB</span><div class="img-frame"><img src="mibibe.png"></div><h3 class="hero-name">Mibibe</h3><div class="stats"><span><b>♾️ Rage Meter:</b> Take DMG = +1 DMG Power (Max. 3).</span><span class="active-skill"><b>⚡ SMASH!!!:</b> Burn Rage for big DMG.</span></div></div>
+					<div class="hero-card night-card"><span class="sticker">NQ</span><div class="img-frame"><img src="https://www.goneqwackers.co.uk/cdn/shop/files/22531CE1-C796-4422-8EF9-B935B60A731C.jpg?v=1740237714"></div><h3 class="hero-name">Nightquack</h3><div class="stats"><span><b>♾️ Ready For Anything:</b> Once per round, reduce DMG by 1 on incorrect answer.</span><span class="active-skill"><b>⚡ Interrogation:</b> Reveal an opponent's ability card.</span></div></div>
+					<div class="hero-card thunder-card"><span class="sticker">TQ</span><div class="img-frame"><img src="https://www.thequacktory.com/cdn/shop/files/Thor-Duck.png?v=1755239779"></div><h3 class="hero-name">Thunderquack</h3><div class="stats"><span><b>♾️ Static Charge:</b> Win logic check = +1 DMG next attack.</span><span class="active-skill"><b>⚡ Thunder Slam:</b> AOE Logic Check.</span></div></div>
+					<div class="hero-card spider-card"><span class="sticker">SP</span><div class="img-frame"><img src="https://amsterdamduckstore.com/wp-content/uploads/2015/08/spidy-rubber-duck-leaning.jpg"></div><h3 class="hero-name">Spiderduck</h3><div class="stats"><span><b>♾️ Web Swing:</b> Ignore traps/penalties (incorrect answers, corners).</span><span class="active-skill"><b>⚡ Sticky Trap:</b> -2 Move to enemy.</span></div></div>
+					<div class="hero-card prof-card"><span class="sticker">PF</span><div class="img-frame"><img src="profquack.png"></div><h3 class="hero-name">Professor Quack</h3><div class="stats"><span><b>♾️ Mental Focus:</b> Remove one wrong option.</span><span class="active-skill"><b>⚡ Mind Link:</b> Duel two players at once.</span></div></div>
+					<div class="hero-card dyna-card"><span class="sticker">BK</span><div class="img-frame"><img src="https://m.media-amazon.com/images/I/51NV1+ZdSOL.jpg"></div><h3 class="hero-name">Dynaduck</h3><div class="stats"><span><b>♾️ Nitro Boost:</b> Hard/Extreme = +1 DMG.</span><span class="active-skill"><b>⚡ Chain Reaction:</b> DMG hits neighbors.</span></div></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="screen-roll" class="screen">
+		<h1>🎲 Rolling for Characters!</h1>
+		<p>Each player gets a random character…</p>
+		<div class="roll-cards-grid" id="roll-cards-grid"></div>
+	</div>
+
+	<div id="screen-game" class="screen">
+		<div class="game-topbar">
+			<div class="game-title">🦆 DUCKING AROUND</div>
+			<div class="legend-bar">
+				<div class="leg-chip"><div class="leg-sq" style="background:#ffe8e8;border-color:#c0392b"></div>Combat</div>
+				<div class="leg-chip"><div class="leg-sq" style="background:#deeaf7;border-color:#1a4f8a"></div>Logic</div>
+				<div class="leg-chip"><div class="leg-sq" style="background:#ecdff7;border-color:#5b2d8e"></div>Ability</div>
+				<div class="leg-chip"><div class="leg-sq" style="background:#fffacd;border-color:#b8860b"></div>Choice</div>
+				<div class="leg-chip"><div class="leg-sq" style="background:#f0e6d0;border-color:#2c2416"></div>Corner</div>
+			</div>
+			<button class="inv-btn-topbar" id="inv-btn-topbar" onclick="playAudio();openInventory()">🎒 Inventory</button>
+		</div>
+		<div class="game-body">
+			<div class="game-left">
+				<div id="pcards-left"></div>
+			</div>
+			<div class="game-center">
+				<div class="turn-bar">
+					<div>
+						<div class="turn-name" id="turn-name">Player 1's Turn</div>
+						<div class="turn-info" id="turn-info">Tile 0 — GO!</div>
+					</div>
+					<div class="dice-result-display" id="dice-result"></div>
+				</div>
+				<div class="board-wrap">
+					<div id="board-container">
+						<div id="board-center">
+							<div class="center-logo-area">
+								<div class="center-logo-text">DUCKING<br>AROUND</div>
+								<div class="center-dice-overlay">
+									<div class="dice-row">
+										<div class="container-dice"><div id="dice1" class="dice"></div></div>
+										<div class="container-dice"><div id="dice2" class="dice"></div></div>
+									</div>
+									<button class="roll-btn" id="roll-btn" onclick="playAudio();rollDice()">🎲 Roll Dice</button>
+									<div class="ai-thinking" id="ai-thinking">🤖 AI is thinking...</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="game-right">
+				<div class="soo-wrap">
+					<div class="soo-duck-grid">
+						<div class="soo-duck-card soo-a"><span class="soo-sticker">A</span><div class="soo-duck-name">Big Blue</div><div class="soo-duck-quote">"ALL ducks are cool!"</div><div class="soo-duck-badge">Universal +</div></div>
+						<div class="soo-duck-card soo-e"><span class="soo-sticker">E</span><div class="soo-duck-name">Big Red</div><div class="soo-duck-quote">"NO ducks are cool!"</div><div class="soo-duck-badge">Universal −</div></div>
+						<div class="soo-duck-card soo-i"><span class="soo-sticker">I</span><div class="soo-duck-name">Little Blue</div><div class="soo-duck-quote">"Some ducks ARE cool!"</div><div class="soo-duck-badge">Particular +</div></div>
+						<div class="soo-duck-card soo-o"><span class="soo-sticker">O</span><div class="soo-duck-name">Little Red</div><div class="soo-duck-quote">"Some ducks AREN'T cool!"</div><div class="soo-duck-badge">Particular −</div></div>
+					</div>
+					<div class="soo-rels">
+						<b style="color:#c0392b">💥 Total Rivals:</b> A↔O, E↔I (always opposite!)<br>
+						<b style="color:#1a4f8a">🥊 Boss Fight:</b> A↔E (can't both be true!)<br>
+						<b style="color:#2a7ab5">😎 Chill Zone:</b> I↔O (can both be true!)<br>
+						<b style="color:#b8860b">🎢 Truth Slide:</b> A→I, E→O (big → little)
+					</div>
+				</div>
+				<div class="panel">
+					<div class="panel-title">📜 Battle Log</div>
+					<div class="log-wrap" id="battle-log"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="modal-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(44,36,22,0.55);align-items:center;justify-content:center;backdrop-filter:blur(2px)">
+		<div id="modal-box" style="background:var(--paper);border:3px solid var(--ink);border-radius:12px;padding:24px 28px;max-width:520px;width:90%;max-height:92vh;overflow-y:auto;box-shadow:6px 8px 0 rgba(44,36,22,0.18);font-family:'Montserrat',sans-serif;font-size:15px;position:relative"></div>
+	</div>
+
+	<script>
+		window.players = [];
+		window.numPlayers = 2;
+		window.gameMode = "standard";
+		window.numAI = 0;
+		window.currentPlayerIndex = 0;
+		window.mySlotIndex = -1;
+		window.isHost = false;
+		window.currentRoomCode = null;
+		window.gameStarted = false;
+		window.rolling = false;
+		window.pendingModal = null;
+		window.tileMap = [];
+		window.board = [];
+		window._quackShown = false;
+		window._choiceCards = [];
+		window._gambleQ = null;
+		window._db = null;
+		window._fbRef = null;
+		window._fbUpdate = null;
+
+		const sleep = ms => new Promise(r => setTimeout(r, ms));
+		const tileCount = 40;
+		const boardSize = 11;
+		let logEntries = [];
+
+		const COMBAT_NAMES = ["Riddle Duel","Quack Clash","Duck Debat-tile","Duck Fight","Brain Battle","Contra Clash","Quackdown","Duck-off","Flock Fight","Waddle War","Counter Strike","Inference War","Bill-to-Bill","Quack-tical Combat","Argument Arena","Quack Attack"];
+		const LOGIC_NAMES = ["Square Spot","Type Check","Relation Zone","Truth Test","Logic Lane","Inference Isle","Burden of Proof","Prop. Path","Contrary Corner","Subaltern Sq.","Duck Deduction","Quack Quiz"];
+		const ABILITY_NAMES = ["Power Pond","Ability Alley","Chaos Channel","Waddle Wildcard"];
+		const CHOICE_NAMES = ["Crossroads","Decision Dock","Fork in the Pond","Strategy"];
+
+		const CORNER_DATA = [
+			{tileId:0, icon:"🏁", name:"GO!", special:"start"},
+			{tileId:10, icon:"🌊", name:"DARK POND", special:"darkPond"},
+			{tileId:20, icon:"⛓️", name:"DUCK JAIL", special:"duckJail"},
+			{tileId:30, icon:"🎲", name:"QUACK FOR ALL", special:"quackForAll"}
+		];
+
+		const ABILITY_CARDS = [
+			{id:"warpwings",  emoji:"🪽", name:"Warp Wings",     desc:"Move double spaces on your next roll."},
+			{id:"quackdrain", emoji:"💧", name:"Quack Drain",    desc:"Drain 2 HP from a chosen opponent."},
+			{id:"dodge",      emoji:"🍃", name:"Feather Dodge",  desc:"Skip the next Combat tile."},
+			{id:"healpool",   emoji:"💚", name:"Healing Splash", desc:"Restore 5 HP immediately."},
+			{id:"bubble",     emoji:"🫧", name:"Bubble Armor",   desc:"Block the next hit entirely."},
+			{id:"quackport",  emoji:"🌀", name:"Quack-Port",     desc:"Teleport to Tile 0 (+1 HP)."},
+			{id:"freeze",     emoji:"❄️", name:"Freeze Tag",     desc:"Target player skips their next turn."},
+			{id:"mirror",     emoji:"🪞", name:"Mirror Shield",  desc:"Reflect the next attack to attacker."}
+		];
+
+		const SUBJECTS = ["Ducks","Heroes","Wizards","Knights","Dragons","Robots","Ninjas","Pirates","Elves","Giants","Warriors","7E","7R","8E","8R","9E","9R","10E","10R"];
+		const PREDICATES = ["brave","magical","strong","wise","fast","invisible","ancient","friendly","dangerous","legendary","clever","fearless","smart","active","sharp","correct","calm","focused","winning"];
+
+		const PROPS = {
+			A:{label:"Universal Affirmative", tmpl:"All [S] are [P]"},
+			E:{label:"Universal Negative",    tmpl:"No [S] are [P]"},
+			I:{label:"Particular Affirmative",tmpl:"Some [S] are [P]"},
+			O:{label:"Particular Negative",   tmpl:"Some [S] are not [P]"}
+		};
+
+		const LOGIC_RULES = {
+			relations: {
+				"A-O":"Total Rivals (Contradictory)", "O-A":"Total Rivals (Contradictory)",
+				"E-I":"Total Rivals (Contradictory)", "I-E":"Total Rivals (Contradictory)",
+				"A-E":"Boss Fight (Contrary)",        "E-A":"Boss Fight (Contrary)",
+				"I-O":"Chill Zone (Subcontrary)",     "O-I":"Chill Zone (Subcontrary)",
+				"A-I":"Truth Slide (Subalternation)", "E-O":"Truth Slide (Subalternation)",
+				"I-A":"Truth Slide (Subalternation)", "O-E":"Truth Slide (Subalternation)"
+			},
+			truthMap: {
+				A:{TRUE:{E:"FALSE",I:"TRUE",O:"FALSE"}, FALSE:{O:"TRUE",E:"Undetermined",I:"Undetermined"}},
+				E:{TRUE:{A:"FALSE",I:"FALSE",O:"TRUE"}, FALSE:{I:"TRUE",A:"Undetermined",O:"Undetermined"}},
+				I:{TRUE:{E:"FALSE",A:"Undetermined",O:"Undetermined"}, FALSE:{A:"FALSE",E:"TRUE",O:"TRUE"}},
+				O:{TRUE:{A:"FALSE",E:"Undetermined",I:"Undetermined"}, FALSE:{A:"TRUE",E:"FALSE",I:"TRUE"}}
+			}
+		};
+
+		const ALL_CHARS = [
+			{id:"D2", name:"DuckDash",       emoji:"🏃", color:"#3498db", role:"Speedster", passive:"Move +/- 1 tile after roll.", active:"Extra move phase! (No attack)", activeKey:"dash_move"},
+			{id:"WF", name:"Waterfowl",      emoji:"💧", color:"#2ecc71", role:"Tank",      passive:"No EXTREME attacks on Waterfowl.", active:"Enemy's next fail = +1 DMG.", activeKey:"wf_splash"},
+			{id:"MB", name:"Mibibe",         emoji:"😡", color:"#e74c3c", role:"Brawler",   passive:"Take DMG = +1 Rage (Max 3).", active:"Burn Rage for big DMG.", activeKey:"mb_smash"},
+			{id:"NQ", name:"Nightquack",     emoji:"🕵️", color:"#2c3e50", role:"Detective", passive:"Reduce DMG by 1 on incorrect (1/round).", active:"Reveal an opponent's ability card.", activeKey:"nq_detect"},
+			{id:"TQ", name:"Thunderquack",   emoji:"⚡", color:"#f1c40f", role:"Shocker",   passive:"Win logic check = +1 DMG next attack.", active:"AOE Logic Check.", activeKey:"tq_slam"},
+			{id:"SP", name:"Spiderduck",     emoji:"🕸️", color:"#9b59b6", role:"Trapper",   passive:"Ignore traps/penalties.", active:"-2 Move to enemy.", activeKey:"sp_trap"},
+			{id:"PR", name:"Professor Quack",emoji:"🎓", color:"#e67e22", role:"Scholar",   passive:"Remove one incorrect option.", active:"Duel two players at once.", activeKey:"prof_link"},
+			{id:"BK", name:"Dynaduck",       emoji:"🧨", color:"#d35400", role:"Blaster",   passive:"Hard/Extreme = +1 DMG.", active:"DMG hits neighbors.", activeKey:"dyna_chain"}
+		];
+
+		const PLAYER_COLORS = ["var(--red-ink)","var(--blue-ink)","var(--purple-ink)","var(--green-ink)"];
+		const PLAYER_BG = ["rgba(255,87,51,0.2)","rgba(51,87,255,0.2)","rgba(243,51,255,0.2)","rgba(51,255,87,0.2)"];
+
+		function playAudio() {
+			try { const q = new Audio("discord-quack-made-with-Voicemod.mp3"); q.volume=0.6; q.play().catch(()=>{}); } catch(e) {}
+		}
+		window.playAudio = playAudio;
+
+		function switchRulesPage(n) {
+			document.querySelectorAll('.rules-page').forEach((p,i) => p.classList.toggle('active', i+1===n));
+			document.querySelectorAll('.rules-page-btn').forEach((b,i) => b.classList.toggle('active', i+1===n));
+		}
+		window.switchRulesPage = switchRulesPage;
+
+		function showScreen(screenId) {
+			document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
+			const target = document.getElementById(`screen-${screenId}`);
+			if (target) { target.classList.add('active'); target.style.display = 'flex'; }
+		}
+		window.showScreen = showScreen;
+
+		function startGame() {
+			document.getElementById("menuRules").style.display="none";
+			document.getElementById("menuDucks").style.display="none";
+			document.getElementById("menuOptions").style.display="flex";
+		}
+		function showRules() {
+			document.getElementById("menuRules").style.display="flex";
+			document.getElementById("menuDucks").style.display="none";
+			document.getElementById("menuOptions").style.display="none";
+		}
+		function showDucks() {
+			document.getElementById("menuRules").style.display="none";
+			document.getElementById("menuDucks").style.display="flex";
+			document.getElementById("menuOptions").style.display="none";
+		}
+		window.startGame = startGame; window.showRules = showRules; window.showDucks = showDucks;
+
+		function refreshDisabledAI() {
+			document.querySelectorAll('#ai-opts .opt-card').forEach(card => {
+				const v = card.dataset.ai === 'none' ? 0 : parseInt(card.dataset.ai);
+				if (v >= window.numPlayers) { card.classList.add('disabled'); if (window.numAI === v) { window.numAI = 0; updateAIUI('none'); } }
+				else card.classList.remove('disabled');
+			});
+		}
+		function updateAIUI(cur) {
+			document.querySelectorAll('#ai-opts .opt-card').forEach(c => c.classList.toggle('selected', c.dataset.ai === cur));
+		}
+		function selectCount(n) {
+			window.numPlayers = n;
+			document.querySelectorAll('#player-count-opts .opt-card').forEach(c => c.classList.toggle('selected', parseInt(c.dataset.count) === n));
+			refreshDisabledAI();
+		}
+		function selectAI(a) {
+			const req = a==='none'?0:parseInt(a);
+			if(req<window.numPlayers){window.numAI=req;updateAIUI(a);}
+		}
+		function selectMode(m) {
+			window.gameMode = m;
+			document.querySelectorAll('#mode-opts .opt-card').forEach(c => c.classList.toggle('selected', c.dataset.mode === m));
+		}
+		window.selectCount = selectCount; window.selectAI = selectAI; window.selectMode = selectMode;
+
+		function validateAndStart() {
+			document.getElementById("screen-menu").classList.add("slide-out-left");
+			const ms = document.querySelector(".menu-side"); if (ms) ms.classList.add("slide-out-left");
+			setTimeout(() => { showScreen('roll'); startRoll(); }, 800);
+		}
+		window.validateAndStart = validateAndStart;
+
+		function buildTileMap() {
+			const corner = [0,10,20,30], choice = [5,15,25,35];
+			const isBlitz = window.gameMode === 'blitz';
+			const slotsRemaining = tileCount - corner.length - choice.length - 4;
+			let combatCount, logicCount;
+			if (isBlitz) {
+				combatCount = Math.floor(Math.random() * 3) + 4;
+				logicCount = slotsRemaining - combatCount;
+			} else {
+				combatCount = Math.floor(Math.random() * 6) + 13;
+				logicCount = slotsRemaining - combatCount;
+			}
+			let tilePool = [];
+			for (let i=0;i<4;i++) tilePool.push("ability");
+			for (let i=0;i<combatCount;i++) tilePool.push("combat");
+			for (let i=0;i<logicCount;i++) tilePool.push("logic");
+			tilePool.sort(() => Math.random()-0.5);
+			let lastType=null, repeatCount=0, combatIdx=0, logicIdx=0;
+			return Array.from({length:tileCount}, (_,i) => {
+				let type, tileName;
+				if (corner.includes(i)) { type="corner"; lastType="corner"; repeatCount=0; }
+				else if (choice.includes(i)) { type="choice"; lastType="choice"; repeatCount=0; }
+				else {
+					if (repeatCount>=2 && tilePool[tilePool.length-1]===lastType) {
+						const swapIdx = tilePool.findIndex(t=>t!==lastType);
+						if (swapIdx!==-1) { const tmp=tilePool[swapIdx]; tilePool[swapIdx]=tilePool[tilePool.length-1]; tilePool[tilePool.length-1]=tmp; }
+					}
+					type = tilePool.pop();
+					if (type===lastType) repeatCount++; else { repeatCount=1; lastType=type; }
+				}
+				if (type==="corner") tileName = i===0?"GO!":i===10?"DARK POND":i===20?"DUCK JAIL":"QUACK FOR ALL";
+				else if (type==="choice") tileName = CHOICE_NAMES[Math.floor(Math.random()*CHOICE_NAMES.length)];
+				else if (type==="ability") tileName = ABILITY_NAMES[Math.floor(Math.random()*ABILITY_NAMES.length)];
+				else if (type==="combat") { tileName = COMBAT_NAMES[combatIdx % COMBAT_NAMES.length]; combatIdx++; }
+				else { tileName = LOGIC_NAMES[logicIdx % LOGIC_NAMES.length]; logicIdx++; }
+				return {type, name:tileName};
+			});
+		}
+		window.buildTileMap = buildTileMap;
+
+		function buildBoard(tm) {
+			const cells = [];
+			for (let i=0;i<boardSize*boardSize;i++) {
+				const row=Math.floor(i/boardSize), col=i%boardSize;
+				const isEdge = row===0||row===10||col===0||col===10;
+				if (!isEdge) { cells.push({row,col,type:"center"}); continue; }
+				let tileId;
+				if (row===10) tileId=10-col;
+				else if (col===0) tileId=10+(10-row);
+				else if (row===0) tileId=20+col;
+				else tileId=30+row;
+				cells.push({row,col,...tm[tileId],tileId});
+			}
+			return cells;
+		}
+		window.buildBoard = buildBoard;
+
+		window.tileMap = buildTileMap();
+		window.board = buildBoard(window.tileMap);
+
+		function renderBoard(cells) {
+			const container = document.getElementById("board-container");
+			Array.from(container.children).forEach(child => {
+				if (child.id!=='board-center'&&!child.classList.contains('token')) container.removeChild(child);
+			});
+			cells.forEach(cellData => {
+				if (cellData.type==="center") return;
+				const tile = document.createElement("div");
+				tile.className = `tile ${cellData.type}`;
+				tile.dataset.tileId = cellData.tileId;
+				if (cellData.row===10) tile.classList.add("bottom-tile");
+				if (cellData.row===0)  tile.classList.add("top-tile");
+				if (cellData.col===0)  tile.classList.add("left-tile");
+				if (cellData.col===10) tile.classList.add("right-tile");
+				tile.style.gridColumn = cellData.col+1;
+				tile.style.gridRow    = cellData.row+1;
+				tile.innerHTML = `<span class="tile-number">${cellData.tileId}</span><div class="tile-name">${cellData.name||''}</div>`;
+				container.appendChild(tile);
+			});
+		}
+
+		function createDice(el) {
+			const faces=[['dc'],['tl','br'],['tl','dc','br'],['tl','tr','bl','br'],['tl','tr','dc','bl','br'],['tl','tr','ml','mr','bl','br']];
+			faces.forEach(face => {
+				const side=document.createElement('div'); side.className='side';
+				face.forEach(pos => { const dot=document.createElement('div'); dot.className=`dot ${pos}`; side.appendChild(dot); });
+				el.appendChild(side);
+			});
+		}
+		function getRotation(n) { return[[0,0],[0,180],[0,-90],[0,90],[-90,0],[90,0]][n-1]; }
+		function rollOne(el) {
+			el.style.transition='none'; el.offsetHeight;
+			el.style.transition='transform 0.9s cubic-bezier(.2,.8,.3,1)';
+			const r=Math.floor(Math.random()*6)+1;
+			const sX=(Math.floor(Math.random()*2)+1)*360, sY=(Math.floor(Math.random()*2)+1)*360;
+			const [fX,fY]=getRotation(r);
+			el.style.transform=`rotateX(${sX}deg) rotateY(${sY}deg)`;
+			setTimeout(()=>{el.style.transform=`rotateX(${sX+fX}deg) rotateY(${sY+fY}deg)`;},10);
+			return r;
+		}
+
+		function buildStmt(type, s, p) {
+			const tmpl={A:"All [S] are [P]",E:"No [S] are [P]",I:"Some [S] are [P]",O:"Some [S] are not [P]"};
+			return (tmpl[type]||"").replace("[S]",s).replace("[P]",p);
+		}
+
+		function generateComplexQuestion(tileType, difficulty) {
+			const s = SUBJECTS[Math.floor(Math.random()*SUBJECTS.length)];
+			const p = PREDICATES[Math.floor(Math.random()*PREDICATES.length)];
+			const types = ['A','E','I','O'];
+			const t1 = types[Math.floor(Math.random()*4)];
+			const t2 = types.filter(t=>t!==t1)[Math.floor(Math.random()*3)];
+			const stmt1 = buildStmt(t1,s,p);
+			const stmt2 = buildStmt(t2,s,p);
+			const relation = LOGIC_RULES.relations[`${t1}-${t2}`];
+			if (difficulty==='medium') {
+				return {prompt:`RELATION BATTLE!\n1. "${stmt1}"\n2. "${stmt2}"\n\nWhat is the relation between these two?`, options:["Total Rivals (Contradictory)","Boss Fight (Contrary)","Chill Zone (Subcontrary)","Truth Slide (Subalternation)"], answer:relation, dmg:2};
+			}
+			if (difficulty==='hard') {
+				const val1 = Math.random()>0.5?"TRUE":"FALSE";
+				const result = (LOGIC_RULES.truthMap[t1]&&LOGIC_RULES.truthMap[t1][val1]) ? (LOGIC_RULES.truthMap[t1][val1][t2]||"Undetermined") : "Undetermined";
+				return {prompt:`TRUTH VALUE CHECK!\nIf Statement 1 is ${val1}:\n1. "${stmt1}"\n\nWhat is the truth value of:\n2. "${stmt2}"?`, options:["TRUE","FALSE","Undetermined"], answer:result, dmg:3};
+			}
+			if (difficulty==='extreme') {
+				const allTypes=['A','E','I','O'];
+				const val1 = Math.random()>0.5?"TRUE":"FALSE";
+				const possibleResults = LOGIC_RULES.truthMap[t1][val1];
+				const trueTypes = Object.keys(possibleResults).filter(type=>possibleResults[type]==="TRUE");
+				let options=[], correctAnswer="";
+				if (trueTypes.length===0) {
+					correctAnswer="None of the above";
+					options=[buildStmt('A',s,p),buildStmt('E',s,p),buildStmt('I',s,p),"None of the above"];
+				} else if (trueTypes.length>1) {
+					correctAnswer="More than one of the above";
+					options=[buildStmt(trueTypes[0],s,p),buildStmt(trueTypes[1],s,p),buildStmt(allTypes.find(t=>!trueTypes.includes(t)),s,p),"More than one of the above"];
+				} else {
+					correctAnswer=buildStmt(trueTypes[0],s,p);
+					const otherTypes=allTypes.filter(t=>t!==trueTypes[0]);
+					options=[correctAnswer,buildStmt(otherTypes[0],s,p),buildStmt(otherTypes[1],s,p),"None of the above"];
+				}
+				return {prompt:`EXTREME CHALLENGE!\nIf Statement 1 is ${val1}:\n1. "${buildStmt(t1,s,p)}"\n\nWhich of these MUST be TRUE?`, options:options.sort(()=>Math.random()-0.5), answer:correctAnswer, dmg:4};
+			}
+			return {prompt:`Identify this statement type:\n"${stmt1}"`, options:types.map(t=>`${t} — ${buildStmt(t,s,p)}`).sort(()=>Math.random()-0.5), answer:`${t1} — ${stmt1}`, dmg:1};
+		}
+
+		function generateGambleQuestion() {
+			return generateComplexQuestion('logic', 'hard');
+		}
+
+		function startRoll() {
+			showScreen('roll');
+			const hp = window.gameMode==='blitz'?8:window.gameMode==='endurance'?24:16;
+			const grid = document.getElementById('roll-cards-grid');
+			if (grid) grid.innerHTML='';
+			const finalDucks = [...ALL_CHARS].sort(()=>Math.random()-0.5).slice(0,window.numPlayers);
+			for (let i=0;i<window.numPlayers;i++) {
+				const isAI = i>=(window.numPlayers-window.numAI);
+				const wrapper = document.createElement('div');
+				wrapper.innerHTML=`<div class="player-label" style="color:${PLAYER_COLORS[i]}">● Player ${i+1}${isAI?' 🤖 AI':''}</div><div class="roll-card rolling" id="rcard-${i}"><div style="color:var(--ink3);text-align:center;padding:20px 0">Rolling...</div></div>`;
+				if (grid) grid.appendChild(wrapper);
+			}
+			let iter=0, maxIter=20;
+			const iv = setInterval(()=>{
+				iter++;
+				for (let i=0;i<window.numPlayers;i++) {
+					const el=document.getElementById(`rcard-${i}`); if(!el) continue;
+					const isSettling=iter>(maxIter-window.numPlayers+i);
+					const duck=isSettling?finalDucks[i]:ALL_CHARS[Math.floor(Math.random()*ALL_CHARS.length)];
+					el.className=`roll-card ${isSettling?'settled':'rolling'}`;
+					el.innerHTML=`<div class="rc-header"><span style="font-size:2rem">${duck.emoji}</span><div><div class="rc-name" style="color:${duck.color};font-weight:bold">${duck.name}</div><div class="rc-role">${duck.role}</div></div></div><div class="rc-passive">✨ <b>Passive:</b> ${duck.passive}</div><div class="rc-active">⚡ <b>Active:</b> ${duck.active}</div>`;
+				}
+				if (iter>=maxIter) { clearInterval(iv); setTimeout(()=>finalizeGameStart(finalDucks,hp),1000); }
+			},130);
+		}
+		window.startRoll = startRoll;
+
+		window.startRollWithDucks = function(finalDucks, hp, playerNames) {
+			if(window.gameStarted===true&&window.players.length>0) return;
+			showScreen('roll');
+			const grid=document.getElementById('roll-cards-grid'); grid.innerHTML='';
+			for(let i=0;i<finalDucks.length;i++){
+				const wrapper=document.createElement('div');
+				wrapper.innerHTML=`<div class="player-label" style="color:${PLAYER_COLORS[i]}">● ${playerNames[i]}</div><div class="roll-card rolling" id="rcard-${i}"><div style="text-align:center;padding:20px 0">Rolling...</div></div>`;
+				grid.appendChild(wrapper);
+			}
+			let iter=0,maxIter=20;
+			const iv=setInterval(()=>{
+				iter++;
+				for(let i=0;i<finalDucks.length;i++){
+					const el=document.getElementById(`rcard-${i}`);if(!el)continue;
+					const isSettling=iter>(maxIter-finalDucks.length+i);
+					const duck=isSettling?finalDucks[i]:ALL_CHARS[Math.floor(Math.random()*ALL_CHARS.length)];
+					el.className=`roll-card ${isSettling?'settled':'rolling'}`;
+					el.innerHTML=`<div class="rc-header"><span style="font-size:2rem">${duck.emoji}</span><div><div class="rc-name" style="color:${duck.color};font-weight:bold">${duck.name}</div><div class="rc-role">${duck.role}</div></div></div><div class="rc-passive">✨ <b>Passive:</b> ${duck.passive}</div><div class="rc-active">⚡ <b>Active:</b> ${duck.active}</div>`;
+				}
+				if(iter>=maxIter){clearInterval(iv);setTimeout(()=>finalizeGameStart(finalDucks,hp,playerNames),1000);}
+			},130);
+		};
+
+		function finalizeGameStart(duckChoices, hpValue, onlineNames=null) {
+			window.players = duckChoices.map((duck,i) => {
+				let finalName = (onlineNames&&onlineNames[i])?onlineNames[i]:"";
+				if (!finalName) { const inp=document.getElementById(`player-name-input-${i}`); finalName=inp?.value.trim()||`Player ${i+1}`; }
+				return {
+					id:i, name:finalName, char:duck, pcolor:PLAYER_COLORS[i], pbg:PLAYER_BG[i],
+					pos:0, hp:hpValue, maxHp:hpValue,
+					abilities:[], shield:false, activeUsed:false, eliminated:false,
+					skipNext:false, doubleMoveNext:false, frozenTurns:0, mirrorActive:false,
+					isAI:i>=(window.numPlayers-window.numAI),
+					rage:0, staticCharge:false, firstHitThisRound:false, inJail:false,
+					splashActive:false, movePenalty:0
+				};
+			});
+			renderPlayerCards(); updateTurnBar();
+			setTimeout(()=>{ showScreen('game'); initGame(); },3000);
+		}
+
+		function initGame() {
+			window.currentPlayerIndex = 0;
+			window.rolling = false;
+			if (!window.currentRoomCode || window.isHost) {
+				window.tileMap = buildTileMap();
+				if (window.currentRoomCode && window.isHost && typeof window._fbUpdate==='function') {
+					window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}`),{tileMap:window.tileMap});
+				}
+			}
+			window.board = buildBoard(window.tileMap);
+			renderBoard(window.board);
+			const d1=document.getElementById('dice1'), d2=document.getElementById('dice2');
+			if(d1){d1.innerHTML='';createDice(d1);} if(d2){d2.innerHTML='';createDice(d2);}
+			const container=document.getElementById("board-container");
+			container.querySelectorAll('.token').forEach(t=>t.remove());
+			window.players.forEach((p)=>{
+				const token=document.createElement("div");
+				token.className="token"; token.id=`token-${p.id}`;
+				token.style.background=p.pcolor; token.textContent=p.char.emoji;
+				container.appendChild(token);
+				p.element=token;
+			});
+			updateTokenPositions();
+			const rb=document.getElementById('roll-btn');
+			if(rb) rb.disabled=(window.mySlotIndex!==-1&&window.currentPlayerIndex!==window.mySlotIndex);
+			addLog("🦆 Game started! Good luck!","log-system");
+			if(window.players[0]&&window.players[0].isAI) { if(rb)rb.disabled=true; setTimeout(()=>doAITurn(),1500); }
+		}
+
+		function updateTokenPositions() {
+			const container=document.getElementById("board-container"); if(!container)return;
+			const containerRect=container.getBoundingClientRect();
+			const cellW=containerRect.width/boardSize, cellH=containerRect.height/boardSize;
+			window.players.forEach(p=>{
+				const token=document.getElementById(`token-${p.id}`); if(!token)return;
+				const tileId=p.pos;
+				let row,col;
+				if(tileId<10){row=10;col=10-tileId;}
+				else if(tileId<20){row=10-(tileId-10);col=0;}
+				else if(tileId<30){row=0;col=tileId-20;}
+				else{row=tileId-30;col=10;}
+				const offset=(window.players.filter(pp=>pp.pos===p.pos&&pp.id<p.id).length)*8;
+				token.style.left=(col*cellW+cellW/2-14+offset)+'px';
+				token.style.top=(row*cellH+cellH/2-14+offset)+'px';
+			});
+		}
+
+		function renderPlayerCards() {
+			const leftDiv=document.getElementById('pcards-left'); if(!leftDiv)return;
+			leftDiv.innerHTML='';
+			window.players.forEach(p=>{
+				const hpPct=Math.max(0,Math.min(100,(p.hp/p.maxHp)*100));
+				const hpClass=hpPct<25?'critical':hpPct<50?'low':'';
+				const isActive=p.id===window.currentPlayerIndex;
+				let statusParts=[];
+				if(p.inJail)statusParts.push('⛓️ Jailed');
+				if(p.shield)statusParts.push('🛡 Shielded');
+				if(p.mirrorActive)statusParts.push('🪞 Mirror');
+				if(p.skipNext)statusParts.push('🍃 Dodge Ready');
+				if(p.doubleMoveNext)statusParts.push('🪽 Double Move');
+				if(p.frozenTurns>0)statusParts.push('❄️ Frozen');
+				if(p.splashActive)statusParts.push('💦 Splash Ready');
+				if(p.char.id==='MB'&&p.rage>0)statusParts.push(`😡 Rage:${p.rage}`);
+				if((p.movePenalty||0)>0)statusParts.push(`🕸️ -${p.movePenalty} Move`);
+				if(p.char.id==='TQ'&&p.staticCharge)statusParts.push('⚡ Charged');
+				const canUseActive=isActive&&!p.activeUsed&&!p.eliminated&&!p.isAI&&(window.mySlotIndex===-1||p.id===window.mySlotIndex);
+				const div=document.createElement('div');
+				div.className=`player-card${isActive?' active-player':''}${p.eliminated?' eliminated-card':''}`;
+				div.innerHTML=`
+					<div class="pcard-head">
+						<span class="pcard-emoji">${p.char.emoji}</span>
+						<div>
+							<div class="pcard-name" style="color:${p.pcolor}">${p.name}</div>
+							<div class="pcard-char">${p.char.name} · ${p.char.role}</div>
+						</div>
+					</div>
+					<div class="pcard-hp-row">
+						<div class="pcard-hp-bg"><div class="pcard-hp-fill ${hpClass}" style="width:${hpPct}%;background:${hpPct<25?'#c0392b':hpPct<50?'#e67e22':'#27ae60'}"></div></div>
+						<span class="pcard-hp-val">${p.hp}/${p.maxHp}</span>
+					</div>
+					<div class="pcard-passive">♾️ ${p.char.passive}</div>
+					<div class="pcard-active${p.activeUsed?' used':''}${canUseActive?' pcard-active-btn':''}" ${canUseActive?`onclick="playAudio();useActive(${p.id})" style="cursor:pointer"`:''}>${p.activeUsed?'✓ Used':'⚡ '+p.char.active}</div>
+					${statusParts.length?`<div class="pcard-status">${statusParts.join(' · ')}</div>`:''}
+					${p.eliminated?'<div style="color:#c0392b;font-weight:900;font-size:0.8rem;margin-top:4px">💀 ELIMINATED</div>':''}
+				`;
+				leftDiv.appendChild(div);
+			});
+		}
+
+		function updateTurnBar() {
+			const p=window.players[window.currentPlayerIndex]; if(!p) return;
+			const nameEl=document.getElementById('turn-name'); if(nameEl) nameEl.textContent=`${p.name}'s Turn`;
+			const infoEl=document.getElementById('turn-info');
+			if(infoEl) { const tile=window.tileMap[p.pos]; infoEl.textContent=`Tile ${p.pos} — ${tile?tile.name:"?"}${p.inJail?' (JAILED)':''}`; }
+		}
+
+		function updateInvBtn() {
+			const p=window.players[window.currentPlayerIndex]; if(!p) return;
+			const btn=document.getElementById('inv-btn-topbar'); if(!btn) return;
+			const show = p.abilities.length>0 && !p.isAI && !p.eliminated && (window.mySlotIndex===-1||p.id===window.mySlotIndex);
+			btn.style.display = show ? 'inline-block' : 'none';
+			btn.textContent = `🎒 Inventory (${p.abilities.length})`;
+		}
+
+		function addLog(msg, type="") {
+			const log=document.getElementById("battle-log"); if(!log) return;
+			logEntries.push({text:msg,type});
+			const entry=document.createElement("div"); entry.className="log-entry "+type; entry.textContent=msg;
+			log.appendChild(entry); log.scrollTop=log.scrollHeight;
+			if(window.currentRoomCode && typeof window._fbUpdate==='function' && typeof window._fbRef==='function' && window._db) {
+				const logsRef=window._fbRef(window._db,`rooms/${window.currentRoomCode}/logs`);
+				const newKey=Date.now()+'_'+Math.random().toString(36).slice(2,7);
+				const logUpdate={};
+				logUpdate[newKey]={text:msg,type,ts:Date.now()};
+				window._fbUpdate(logsRef,logUpdate).catch(()=>{});
+			}
+		}
+
+		function rollDice() {
+			if (window.rolling||window.pendingModal) return;
+			if (window.mySlotIndex !== -1 && window.currentPlayerIndex !== window.mySlotIndex) return;
+			const p=window.players[window.currentPlayerIndex]; if(!p||p.eliminated){advanceTurn();return;}
+			if (p.isAI) return;
+
+			if (p.inJail) {
+				const d1=document.getElementById('dice1'), d2=document.getElementById('dice2');
+				const r1=rollOne(d1), r2=rollOne(d2);
+				document.getElementById('dice-result').textContent=`🎲 ${r1}+${r2}`;
+				if (r1===r2) {
+					p.inJail=false;
+					addLog(`⛓️ ${p.name} rolled doubles (${r1}+${r2}) and escaped Duck Jail!`,'log-win');
+					syncPlayerState(p);
+					window.rolling=true;
+					document.getElementById('roll-btn').disabled=true;
+					setTimeout(()=>movePlayerAnimated(window.currentPlayerIndex,r1+r2),1000);
+				} else {
+					addLog(`⛓️ ${p.name} is still in Duck Jail! (rolled ${r1}+${r2}, need doubles)`,'log-lose');
+					setTimeout(()=>advanceTurn(),1200);
+				}
+				return;
+			}
+
+			if (p.frozenTurns>0) {
+				window.players[window.currentPlayerIndex].frozenTurns--;
+				addLog(`${p.name} is frozen! Skipping turn.`,'log-system');
+				advanceTurn(); return;
+			}
+			window.rolling=true;
+			document.getElementById('roll-btn').disabled=true;
+			const d1=document.getElementById('dice1'), d2=document.getElementById('dice2');
+			const r1=rollOne(d1), r2=rollOne(d2);
+			let total=p.doubleMoveNext?(r1+r2)*2:(r1+r2);
+			const rawRoll=r1+r2;
+			p.doubleMoveNext=false;
+			if((p.movePenalty||0)>0){
+				const pen=p.movePenalty; p.movePenalty=0;
+				total=Math.max(1,total-pen);
+				addLog(`🕸️ ${p.name} suffers Sticky Trap -${pen} Move!`,'log-lose');
+				if(window.currentRoomCode&&typeof window._fbUpdate==='function'){window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}/players/${p.id}`),{movePenalty:0});}
+			}
+			document.getElementById('dice-result').textContent=`🎲 ${rawRoll}${total!==rawRoll?`→${total}`:''}`;
+			addLog(`${p.name} rolled ${r1}+${r2}=${rawRoll}${total!==rawRoll?` (→${total} after penalty)`:''}!`,'warn');
+			window.players[window.currentPlayerIndex].doubleMoveNext=false;
+			setTimeout(()=>movePlayerAnimated(window.currentPlayerIndex,total),1000);
+		}
+		window.rollDice = rollDice;
+
+		async function movePlayerAnimated(pidx, steps) {
+			const p=window.players[pidx];
+			for(let i=0;i<steps;i++){p.pos=(p.pos+1)%40;updateTokenPositions();await sleep(210);}
+			syncPlayerState(p);
+			window.rolling=false;
+			triggerTile(p);
+		}
+
+		function syncPlayerState(p) {
+			if (!window.currentRoomCode||p.id!==window.mySlotIndex) return;
+			if (typeof window._fbUpdate==='function'&&typeof window._fbRef==='function') {
+				window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}/players/${p.id}`),
+					{pos:p.pos,hp:p.hp,inJail:p.inJail,rage:p.rage,staticCharge:p.staticCharge,activeUsed:p.activeUsed,eliminated:p.eliminated,splashActive:p.splashActive||false,shield:p.shield||false,mirrorActive:p.mirrorActive||false,skipNext:p.skipNext||false,doubleMoveNext:p.doubleMoveNext||false,frozenTurns:p.frozenTurns||0,movePenalty:p.movePenalty||0});
+			}
+		}
+
+		function triggerTile(player) {
+			const tile=window.tileMap[player.pos];
+			addLog(`${player.name} landed on ${tile.name}`,`log-${tile.type}`);
+			if (player.char.id==="D2"&&!player.isAI) { openNudgeModal(player); return; }
+			if (player.char.id==="D2"&&player.isAI) {
+				const nudge=[-1,0,1][Math.floor(Math.random()*3)];
+				player.pos=(player.pos+nudge+tileCount)%tileCount;
+				updateTokenPositions();
+				addLog(`🤖 ${player.name} (Quick Feet) nudged ${nudge>=0?'+':''}${nudge} tile!`,'log-system');
+			}
+			handleTileLogic(player, window.tileMap[player.pos]);
+		}
+
+		function handleTileLogic(player, tile) {
+			const pidx=player.id;
+			if (tile.type==='corner') {
+				if (player.pos===0) {
+					player.hp=Math.min(player.maxHp,player.hp+1);
+					addLog(`🏁 ${player.name} passed GO! +1 HP!`,'log-win');
+					syncPlayerState(player); renderPlayerCards(); updateTurnBar();
+					if (player.isAI) { setTimeout(()=>advanceTurn(),1000); }
+					else openModal(`<div class="m-title">🏁 GO!</div><div class="m-sub">You passed start! +1 HP recovered.</div><button class="m-btn m-btn-primary" onclick="playAudio();closeModal();advanceTurn()">Continue ▶</button>`);
+				}
+				else if (player.pos===10) {
+					addLog(`🌊 ${player.name} is chilling in the Dark Pond. Nothing happens.`,'log-system');
+					setTimeout(()=>advanceTurn(),1000);
+				}
+				else if (player.pos===20) {
+					if (player.char.id==="SP") {
+						addLog(`🕸️ ${player.name}'s Web Swing ignores Duck Jail!`,'log-system');
+						setTimeout(()=>advanceTurn(),1000);
+						return;
+					}
+					player.inJail=true;
+					addLog(`⛓️ ${player.name} is sent to Duck Jail! Roll doubles to escape.`,'log-lose');
+					syncPlayerState(player); renderPlayerCards(); updateTurnBar();
+					if (player.isAI) { setTimeout(()=>advanceTurn(),1000); }
+					else openModal(`<div class="m-title">⛓️ Duck Jail!</div><div class="m-sub">You're locked up! You must roll doubles on your next turn to escape — otherwise you stay jailed.</div><button class="m-btn m-btn-primary" onclick="playAudio();closeModal();advanceTurn()">Okay... ▶</button>`);
+				}
+				else if (player.pos===30) {
+					startQuackForAll(player);
+				}
+			} else if (tile.type==='choice') {
+				if (player.isAI) { aiResolveChoice(player); }
+				else { openChoiceModal(player); }
+			} else if (tile.type==='ability') {
+				const card=ABILITY_CARDS[Math.floor(Math.random()*ABILITY_CARDS.length)];
+				card.uid = Date.now()+Math.random();
+				player.abilities.push({...card}); addLog(`${player.name} drew: ${card.emoji} ${card.name}!`,'log-system'); renderPlayerCards(); updateInvBtn(); advanceTurn();
+			} else if (tile.type==='logic') {
+				if (player.skipNext) { player.skipNext=false; addLog(`${player.name} dodged the Logic tile!`,'log-system'); syncPlayerState(player); advanceTurn(); return; }
+				if (player.char.id==="SP") { addLog(`🕸️ ${player.name}'s Web Swing ignores Logic tile penalty!`,'log-system'); }
+				let q=generateComplexQuestion('logic','medium');
+				if (player.char.id==="PR"&&!player.isAI&&q.options.length>2) {
+					const wrongOpts=q.options.filter(o=>o!==q.answer);
+					const toRemove=wrongOpts[Math.floor(Math.random()*wrongOpts.length)];
+					q.options=q.options.filter(o=>o!==toRemove);
+					addLog(`🎓 ${player.name}'s Mental Focus removes one wrong answer!`,'log-system');
+				}
+				if (!q){advanceTurn();return;}
+				if (player.isAI) { const ans=getAIAnswer(q); const correct=ans===q.answer; addLog(`🤖 ${player.name}: ${ans}`,'log-system'); resolveQuestion(player,correct,null); }
+				else displayQuestion(player,q);
+			} else if (tile.type==='combat') {
+				if (player.skipNext) { player.skipNext=false; addLog(`${player.name} dodged the Combat tile!`,'log-system'); syncPlayerState(player); advanceTurn(); return; }
+				openTargetSelect(pidx,'combatPick');
+			} else { advanceTurn(); }
+		}
+
+		function openChoiceModal(player) {
+			const tileName = window.tileMap[player.pos]?.name || 'Choice Tile';
+			openModal(`<div class="m-title">✨ ${tileName}!</div><div class="m-sub">Pick your reward — choose wisely:</div>
+			<div class="choice-grid">
+				<div class="choice-opt" onclick="playAudio();resolveChoice(${player.id},'heal')">
+					<span class="ci">💚</span>
+					<div><div class="cl">Heal 2 HP</div><div class="cd">Restore a bit of health to stay in the fight</div></div>
+				</div>
+				<div class="choice-opt" onclick="playAudio();resolveChoice(${player.id},'card')">
+					<span class="ci">🃏</span>
+					<div><div class="cl">Random Ability Card</div><div class="cd">Draw a card from the ability deck</div></div>
+				</div>
+				<div class="choice-opt" onclick="playAudio();resolveChoice(${player.id},'gamble')">
+					<span class="ci">🎰</span>
+					<div><div class="cl">Logic Gamble</div><div class="cd">Answer a Hard logic question — correct: +3 moves, wrong: -2 HP</div></div>
+				</div>
+			</div>`);
+		}
+
+		function aiResolveChoice(player) {
+			let choice = 'card';
+			if (player.hp <= player.maxHp*0.45) choice = 'heal';
+			else if (player.abilities.length <= 1) choice = 'card';
+			else choice = 'gamble';
+			addLog(`🤖 ${player.name} (AI) at choice tile: ${choice}`,'log-system');
+			resolveChoice(player.id, choice);
+		}
+
+		function resolveChoice(pidx, choice) {
+			closeModal();
+			const player=window.players[pidx];
+			if (choice==='heal') {
+				player.hp=Math.min(player.maxHp,player.hp+2);
+				addLog(`${player.name} healed 2 HP!`,'log-win');
+				syncPlayerState(player); renderPlayerCards(); updateTurnBar(); advanceTurn();
+			} else if (choice==='card') {
+				const card={...ABILITY_CARDS[Math.floor(Math.random()*ABILITY_CARDS.length)],uid:Date.now()+Math.random()};
+				player.abilities.push(card);
+				addLog(`${player.name} drew: ${card.emoji} ${card.name}!`,'log-win');
+				if (window.currentRoomCode && typeof window._fbUpdate==='function') {
+					window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}/players/${pidx}`),{abilities:player.abilities.map(a=>a.id)});
+				}
+				renderPlayerCards(); updateInvBtn(); advanceTurn();
+			} else if (choice==='gamble') {
+				const q = generateGambleQuestion();
+				window._gambleQ = q;
+				window._gamblePidx = pidx;
+				if (player.isAI) {
+					const ans=getAIAnswer(q); const correct=ans===q.answer;
+					addLog(`🤖 ${player.name} gambles: ${ans} — ${correct?'✅':'❌'}`,correct?'log-win':'log-lose');
+					if (correct) { movePlayerAnimated(pidx,3); }
+					else { player.hp=Math.max(0,player.hp-2); addLog(`${player.name} got it wrong! -2 HP`,'log-lose'); syncPlayerState(player); renderPlayerCards(); checkElimination(player); advanceTurn(); }
+				} else {
+					displayGambleQuestion(player,q);
+				}
+			}
+		}
+		window.resolveChoice = resolveChoice;
+
+		function displayGambleQuestion(player, q) {
+			const overlay=document.createElement("div"); overlay.className="question-overlay";
+			overlay.innerHTML=`<div class="question-card"><div class="tape-piece" style="background:#fff3cd;color:#2c2416">🎰 LOGIC GAMBLE</div><div style="text-align:center;font-size:0.75rem;color:var(--ink3);margin-top:18px;margin-bottom:4px;font-weight:700">Correct = +3 moves &nbsp;|&nbsp; Wrong = -2 HP</div><div class="question-prompt">${q.prompt}</div><div class="question-options" id="q-options"></div><div class="question-timer" id="q-timer-display" style="text-align:center;font-weight:900;color:var(--red-ink);font-size:1.1rem;margin-top:8px">⏱ 30</div></div>`;
+			document.body.appendChild(overlay);
+			const optContainer=overlay.querySelector("#q-options");
+			let answered=false;
+			const timerEl=overlay.querySelector('#q-timer-display');
+			let timeLeft=30;
+			const timerInterval=setInterval(()=>{
+				timeLeft--;
+				if(timerEl)timerEl.textContent=`⏱ ${timeLeft}`;
+				if(timeLeft<=0){
+					clearInterval(timerInterval);
+					if(!answered){
+						answered=true;
+						overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');});
+						addLog(`${player.name} ran out of time! -2 HP`,'log-lose');
+						setTimeout(()=>{
+							overlay.remove();
+							player.hp=Math.max(0,player.hp-2); syncPlayerState(player); renderPlayerCards(); checkElimination(player); advanceTurn();
+						},900);
+					}
+				}
+			},1000);
+			q.options.forEach(opt=>{
+				const btn=document.createElement("button"); btn.className="question-opt-btn"; btn.textContent=opt;
+				btn.onclick=()=>{
+					if(answered)return;
+					answered=true;
+					clearInterval(timerInterval);
+					playAudio();
+					const correct=opt.trim()===q.answer.trim();
+					overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');else if(b===btn&&!correct)b.classList.add('wrong');});
+					addLog(`${player.name} gambled: ${opt} — ${correct?'✅ +3 moves!':'❌ -2 HP!'}`,correct?'log-win':'log-lose');
+					setTimeout(()=>{
+						overlay.remove();
+						if (correct) { movePlayerAnimated(player.id,3); }
+						else { player.hp=Math.max(0,player.hp-2); syncPlayerState(player); renderPlayerCards(); checkElimination(player); advanceTurn(); }
+					},900);
+				};
+				optContainer.appendChild(btn);
+			});
+		}
+
+		function startQuackForAll(triggerPlayer) {
+			addLog("🎲 QUACK FOR ALL! Everyone must answer!","log-system");
+			const q = generateComplexQuestion('logic','hard');
+
+			if (!window.currentRoomCode) {
+				const alive = window.players.filter(p=>!p.eliminated);
+				alive.filter(p=>p.isAI).forEach((p,idx)=>{
+					setTimeout(()=>{
+						const ans=getAIAnswer(q); const correct=ans===q.answer;
+						addLog(`🤖 ${p.name}: "${ans}" — ${correct?'✅':'❌'}`,correct?'log-win':'log-lose');
+						if (!correct) { p.hp=Math.max(0,p.hp-2); addLog(`${p.name} loses 2 HP!`,'log-lose'); renderPlayerCards(); checkElimination(p); }
+					},(idx+1)*700);
+				});
+				const humanPlayer = window.players.find(p=>!p.isAI&&!p.eliminated);
+				if (humanPlayer) {
+					const overlay=document.createElement("div"); overlay.className="question-overlay";
+					overlay.innerHTML=`<div class="question-card"><div class="tape-piece" style="background:#f4e04d;color:#2c2416">🎲 QUACK FOR ALL</div><div style="text-align:center;font-size:0.75rem;color:var(--ink3);margin-top:18px;margin-bottom:4px;font-weight:700">Everyone answers — wrong = -2 HP</div><div class="question-prompt">${q.prompt}</div><div class="question-options" id="q-options"></div><div class="question-timer" id="q-timer-display" style="text-align:center;font-weight:900;color:var(--red-ink);font-size:1.1rem;margin-top:8px">⏱ 30</div></div>`;
+					document.body.appendChild(overlay);
+					const optContainer=overlay.querySelector("#q-options");
+					let answered=false;
+					const timerEl=overlay.querySelector('#q-timer-display');
+					let timeLeft=30;
+					const timerInterval=setInterval(()=>{
+						timeLeft--;
+						if(timerEl)timerEl.textContent=`⏱ ${timeLeft}`;
+						if(timeLeft<=0){
+							clearInterval(timerInterval);
+							if(!answered){
+								answered=true;
+								overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');});
+								addLog(`${humanPlayer.name} ran out of time! -2 HP`,'log-lose');
+								humanPlayer.hp=Math.max(0,humanPlayer.hp-2); syncPlayerState(humanPlayer); renderPlayerCards(); checkElimination(humanPlayer);
+								setTimeout(()=>{overlay.remove();advanceTurn();},900);
+							}
+						}
+					},1000);
+					q.options.forEach(opt=>{
+						const btn=document.createElement("button"); btn.className="question-opt-btn"; btn.textContent=opt;
+						btn.onclick=()=>{
+							if(answered)return;
+							answered=true;
+							clearInterval(timerInterval);
+							playAudio();
+							const correct=opt.trim()===q.answer.trim();
+							overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');else if(b===btn&&!correct)b.classList.add('wrong');});
+							addLog(`${humanPlayer.name}: "${opt}" — ${correct?'✅':'❌'}`,correct?'log-win':'log-lose');
+							if (!correct) { humanPlayer.hp=Math.max(0,humanPlayer.hp-2); addLog(`${humanPlayer.name} loses 2 HP!`,'log-lose'); syncPlayerState(humanPlayer); renderPlayerCards(); checkElimination(humanPlayer); }
+							setTimeout(()=>{overlay.remove();advanceTurn();},900);
+						};
+						optContainer.appendChild(btn);
+					});
+				} else {
+					setTimeout(()=>advanceTurn(),1500);
+				}
+			} else {
+				if (typeof window._fbUpdate==='function') {
+					window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}`),
+						{quackQuestion:q, quackResponses:{}, quackResultsReady:false});
+					addLog("🎲 QUACK FOR ALL triggered! Waiting for all players...","log-system");
+				}
+			}
+		}
+
+		function resolveQuestion(player, correct, overlay) {
+			if (!correct) {
+				let dmg=1;
+				if (player.char.id==="NQ"&&!player.firstHitThisRound) {
+					dmg=0; player.firstHitThisRound=true;
+					addLog("🕵️ Nightquack's Ready For Anything! 0 DMG taken.","log-system");
+					syncPlayerState(player);
+				}
+				if (player.char.id==="SP") {
+					dmg=0;
+					addLog("🕸️ Spiderduck's Web Swing ignores the Logic penalty!","log-system");
+				}
+				if (dmg>0) {
+					player.hp=Math.max(0,player.hp-dmg);
+					if (player.char.id==="MB") { player.rage=Math.min(3,(player.rage||0)+1); addLog("😡 Mibibe's Rage builds! ("+player.rage+"/3)","log-system"); syncPlayerState(player); }
+				}
+				syncPlayerState(player); renderPlayerCards(); checkElimination(player);
+			} else {
+				if (player.char.id==="TQ") { player.staticCharge=true; addLog("⚡ Thunderquack is charged! +1 DMG next attack.","log-system"); syncPlayerState(player); }
+			}
+			if (overlay) overlay.remove();
+			endTurn();
+		}
+
+		function openNudgeModal(player) {
+			openModal(`<div class="m-title">🏃 Quick Feet!</div><div class="m-sub">DuckDash can nudge 1 tile forward or back from Tile ${player.pos}!</div>
+			<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+				<button class="m-btn" onclick="playAudio();nudge(${player.id},-1)">⬅️ Back 1</button>
+				<button class="m-btn m-btn-primary" onclick="playAudio();nudge(${player.id},0)">Stay</button>
+				<button class="m-btn" onclick="playAudio();nudge(${player.id},1)">+1 ➡️</button>
+			</div>`);
+		}
+		window.nudge = function(pidx,dir){
+			const player=window.players[pidx];
+			player.pos=(player.pos+dir+tileCount)%tileCount;
+			updateTokenPositions(); closeModal(); syncPlayerState(player); handleTileLogic(player,window.tileMap[player.pos]);
+		};
+
+		function displayQuestion(player, questionObj) {
+			const existing=document.querySelector(".question-overlay"); if(existing) existing.remove();
+			if (!questionObj) { advanceTurn(); return; }
+			if (player.isAI===true) {
+				setTimeout(()=>{const ans=getAIAnswer(questionObj);const correct=ans===questionObj.answer;addLog(`🤖 ${player.name}: ${ans}`,correct?"log-win":"log-lose");resolveQuestion(player,correct,null);},1200);
+				return;
+			}
+			const overlay=document.createElement("div"); overlay.className="question-overlay";
+			overlay.innerHTML=`<div class="question-card"><div class="tape-piece" style="background:#deeaf7;color:#1a4f8a">📐 LOGIC</div><div class="question-prompt">${questionObj.prompt}</div><div class="question-options" id="q-options"></div><div class="question-timer" id="q-timer-display" style="text-align:center;font-weight:900;color:var(--red-ink);font-size:1.1rem;margin-top:8px">⏱ 30</div></div>`;
+			document.body.appendChild(overlay);
+			const optContainer=overlay.querySelector("#q-options");
+			let answered=false;
+			const timerEl=overlay.querySelector('#q-timer-display');
+			let timeLeft=30;
+			const timerInterval=setInterval(()=>{
+				timeLeft--;
+				if(timerEl)timerEl.textContent=`⏱ ${timeLeft}`;
+				if(timeLeft<=0){
+					clearInterval(timerInterval);
+					if(!answered){
+						answered=true;
+						overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===questionObj.answer)b.classList.add('correct');});
+						addLog(`${player.name} ran out of time! -1 DMG`,'log-lose');
+						setTimeout(()=>resolveQuestion(player,false,overlay),900);
+					}
+				}
+			},1000);
+			questionObj.options.forEach(opt=>{
+				const btn=document.createElement("button"); btn.className="question-opt-btn"; btn.textContent=opt;
+				btn.onclick=()=>{
+					if(answered)return;
+					answered=true;
+					clearInterval(timerInterval);
+					playAudio();
+					const correct=opt.trim()===questionObj.answer.trim();
+					btn.classList.add(correct?'correct':'wrong');
+					overlay.querySelectorAll('.question-opt-btn').forEach(b=>b.disabled=true);
+					if (!correct) { overlay.querySelectorAll('.question-opt-btn').forEach(b=>{if(b.textContent===questionObj.answer)b.classList.add('correct');}); }
+					addLog(`${player.name}: ${opt}`,correct?'log-win':'log-lose');
+					setTimeout(()=>resolveQuestion(player,correct,overlay),800);
+				};
+				optContainer.appendChild(btn);
+			});
+		}
+
+		window.startCombatFlow = function(pidx, defId) {
+			closeModal();
+			const attacker=window.players[pidx], defender=window.players[defId];
+			if(!attacker||!defender){advanceTurn();return;}
+			if(attacker.isAI){const diffs=['medium','hard','extreme'];const d=diffs[Math.floor(Math.random()*diffs.length)];addLog(`🤖 ${attacker.name} challenges ${defender.name} on ${d.toUpperCase()}!`,'log-system');startCombat(pidx,defId,d);return;}
+			const difficulties=[{d:'medium',label:'🥊 Medium',dmg:'2 DMG'},{d:'hard',label:'⚔️ Hard',dmg:'3 DMG'},{d:'extreme',label:'💥 Extreme',dmg:'4 DMG'}];
+			const diffBtns=difficulties.map(({d,label,dmg})=>`<button class="m-btn m-btn-primary" onclick="playAudio();startCombat(${pidx},${defId},'${d}')">${label} — ${dmg}</button>`).join('');
+			openModal(`<div class="m-title">⚔️ ${attacker.name} vs ${defender.name}</div><div class="m-sub">Pick difficulty — higher = more damage on win!</div><div>${diffBtns}</div>`);
+		};
+
+		window.startCombat = function(pidx, defId, difficulty) {
+			closeModal();
+			const attacker=window.players[pidx], defender=window.players[defId];
+			if(!attacker||!defender){advanceTurn();return;}
+			if (!window._battleLoggedThisCombat) {
+				window._battleLoggedThisCombat = true;
+				addLog(`⚔️ Battle: ${attacker.name} vs ${defender.name}!`,'log-combat');
+				setTimeout(()=>{window._battleLoggedThisCombat=false;},5000);
+			}
+			const q=generateComplexQuestion('combat',difficulty);
+			if(attacker.isAI){setTimeout(()=>{const ans=getAIAnswer(q);const correct=ans===q.answer;addLog(`🤖 ${attacker.name}: ${ans}`,correct?"log-win":"log-lose");handleCombatResult(attacker,defender,correct,q);advanceTurn();},1000);return;}
+			displayCombatQuestion(attacker,q,defId);
+		};
+
+		function handleCombatResult(attacker, defender, isCorrect, q) {
+			if(isCorrect&&defender){
+				let dmg=q.dmg||2;
+				if(attacker.char.id==="TQ"&&attacker.staticCharge){dmg+=1;attacker.staticCharge=false;addLog("⚡ Thunderquack's Static Charge adds +1 DMG!","log-system");syncPlayerState(attacker);}
+				if(attacker.char.id==="BK"&&(q.dmg>=3)){dmg+=1;addLog("🧨 Dynaduck's Nitro Boost adds +1 DMG!","log-system");}
+				if(defender.char.id==="WF"&&(q.dmg||0)>=4){addLog("💧 Waterfowl's Soaked Mind blocks EXTREME!","log-system");dmg=0;}
+				if(defender.splashActive){dmg+=1;defender.splashActive=false;addLog(`💥 Waterfowl's Splash adds +1 DMG!`,"log-system");syncPlayerState(defender);}
+				if(defender.mirrorActive){
+					defender.mirrorActive=false;addLog(`🪞 ${defender.name} reflected the attack!`,"log-system");
+					attacker.hp=Math.max(0,attacker.hp-dmg);addLog(`💥 ${attacker.name} takes ${dmg} reflected DMG!`,"log-system");
+					if(attacker.char.id==="MB"&&dmg>0){attacker.rage=Math.min(3,(attacker.rage||0)+1);addLog("😡 Mibibe's Rage builds! ("+attacker.rage+"/3)","log-system");}
+					syncPlayerState(attacker);syncPlayerState(defender);renderPlayerCards();checkElimination(attacker);
+				} else {
+					if(defender.shield){addLog(`🛡 ${defender.name}'s Bubble Armor blocked!`,"log-system");defender.shield=false;syncPlayerState(defender);}
+					else {
+						defender.hp=Math.max(0,defender.hp-dmg);
+						if(defender.char.id==="MB"&&dmg>0){defender.rage=Math.min(3,(defender.rage||0)+1);addLog("😡 Mibibe's Rage builds! ("+defender.rage+"/3)","log-system");}
+						addLog(`💥 ${defender.name} takes ${dmg} DMG!`,'log-combat');
+					}
+					syncPlayerState(defender);renderPlayerCards();checkElimination(defender);
+				}
+			} else if(!isCorrect) {
+				let dmg=1;
+				if(attacker.char.id==="NQ"&&!attacker.firstHitThisRound){dmg=0;attacker.firstHitThisRound=true;addLog("🕵️ Nightquack: 0 DMG on fail.","log-system");}
+				attacker.hp=Math.max(0,attacker.hp-dmg);
+				if(attacker.char.id==="MB"&&dmg>0){attacker.rage=Math.min(3,(attacker.rage||0)+1);addLog("😡 Mibibe's Rage builds! ("+attacker.rage+"/3)","log-system");}
+				if(dmg>0)addLog(`💥 ${attacker.name} got it wrong — takes ${dmg} DMG!`,"log-lose");
+				syncPlayerState(attacker);renderPlayerCards();checkElimination(attacker);
+			}
+		}
+
+		function displayCombatQuestion(attacker, q, defId) {
+			const overlay=document.createElement('div'); overlay.className='question-overlay';
+			const defender=window.players[defId];
+			overlay.innerHTML=`<div class="question-card"><div class="tape-piece" style="background:#ffe0e0">⚔️ ${attacker.name} vs ${defender?.name}</div><div class="question-prompt">${q.prompt}</div><div class="question-options" id="q-options"></div><div class="question-timer" id="q-timer-display" style="text-align:center;font-weight:900;color:var(--red-ink);font-size:1.1rem;margin-top:8px">⏱ 30</div></div>`;
+			document.body.appendChild(overlay);
+			const optContainer=overlay.querySelector('#q-options');
+			let answered=false;
+			const timerEl=overlay.querySelector('#q-timer-display');
+			let timeLeft=30;
+			const timerInterval=setInterval(()=>{
+				timeLeft--;
+				if(timerEl)timerEl.textContent=`⏱ ${timeLeft}`;
+				if(timeLeft<=0){
+					clearInterval(timerInterval);
+					if(!answered){
+						answered=true;
+						overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');});
+						addLog(`${attacker.name} ran out of time! -1 DMG`,'log-lose');
+						setTimeout(()=>{overlay.remove();handleCombatResult(attacker,defender,false,q);advanceTurn();},900);
+					}
+				}
+			},1000);
+			q.options.forEach(opt=>{
+				const btn=document.createElement('button'); btn.className='question-opt-btn'; btn.textContent=opt;
+				btn.onclick=()=>{
+					if(answered)return;
+					answered=true;
+					clearInterval(timerInterval);
+					playAudio();
+					const correct=opt===q.answer;
+					overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');else if(b===btn&&!correct)b.classList.add('wrong');});
+					addLog(`${attacker.name}: ${opt} — ${correct?'✅':'❌'}`,correct?'log-win':'log-lose');
+					setTimeout(()=>{overlay.remove();handleCombatResult(attacker,defender,correct,q);advanceTurn();},1000);
+				};
+				optContainer.appendChild(btn);
+			});
+		}
+
+		function useActive(pidx) {
+			const p=window.players[pidx];
+			if (pidx!==window.currentPlayerIndex||p.activeUsed||p.eliminated||p.isAI) return;
+			if (window.mySlotIndex!==-1&&pidx!==window.mySlotIndex) return;
+			playAudio();
+			p.activeUsed=true;
+			const key=p.char.activeKey;
+			if (key==='dash_move') {
+				p.doubleMoveNext=true;
+				addLog(`🏃 ${p.name} used Speed Burst! Next roll gets a bonus move phase.`,'log-system');
+				syncPlayerState(p); renderPlayerCards();
+			}
+			else if (key==='wf_splash') {
+				p.splashActive=true;
+				addLog(`💧 ${p.name} used Splash Attack! Next enemy fail = +1 DMG.`,'log-system');
+				syncPlayerState(p); renderPlayerCards();
+			}
+			else if (key==='mb_smash') {
+				if ((p.rage||0)>0) {
+					const dmg=p.rage; p.rage=0;
+					const targets=window.players.filter(o=>o.id!==pidx&&!o.eliminated);
+					if(targets.length>0){
+						const t=targets[Math.floor(Math.random()*targets.length)];
+						if(t.shield){addLog(`🛡 ${t.name}'s shield blocked Mibibe's SMASH!!!`,'log-system');t.shield=false;syncPlayerState(t);}
+						else if(t.mirrorActive){t.mirrorActive=false;addLog(`🪞 ${t.name} reflected SMASH!!! back at Mibibe!`,'log-system');p.hp=Math.max(0,p.hp-dmg);addLog(`💥 ${p.name} takes ${dmg} reflected DMG!`,'log-system');syncPlayerState(p);checkElimination(p);}
+						else{t.hp=Math.max(0,t.hp-dmg);addLog(`😡 ${p.name} SMASH!!! ${dmg} DMG to ${t.name}!`,'log-system');if(t.char.id==="MB"){t.rage=Math.min(3,(t.rage||0)+1);addLog("😡 Mibibe's Rage builds!","log-system");}syncPlayerState(t);checkElimination(t);}
+					}
+					syncPlayerState(p); renderPlayerCards();
+				} else { addLog(`${p.name} has no Rage to burn!`,'log-system'); p.activeUsed=false; renderPlayerCards(); }
+			}
+			else if (key==='nq_detect') { openTargetSelect(pidx,'nq_reveal'); return; }
+			else if (key==='tq_slam') {
+				addLog(`⚡ ${p.name} Thunder Slam! AOE Logic Check!`,'log-system');
+				const targets=window.players.filter(o=>o.id!==pidx&&!o.eliminated);
+				const q=generateComplexQuestion('combat','medium');
+				targets.forEach(t=>{
+					if(t.isAI){
+						const ans=getAIAnswer(q);
+						if(ans!==q.answer){
+							if(t.shield){addLog(`🛡 ${t.name}'s shield blocked Thunder Slam!`,'log-system');t.shield=false;syncPlayerState(t);}
+							else{t.hp=Math.max(0,t.hp-2);addLog(`⚡ ${t.name} caught in Thunder! -2 HP`,'log-system');if(t.char.id==="MB"){t.rage=Math.min(3,(t.rage||0)+1);}syncPlayerState(t);checkElimination(t);}
+						} else { addLog(`⚡ ${t.name} answered correctly, dodged Thunder Slam!`,'log-win'); }
+					}
+				});
+				syncPlayerState(p); renderPlayerCards();
+				displayQuestion(p,q); return;
+			}
+			else if (key==='sp_trap') { openTargetSelect(pidx,'sp_freeze'); return; }
+			else if (key==='prof_link') { openTargetSelect(pidx,'prof_duel'); return; }
+			else if (key==='dyna_chain') {
+				addLog(`🧨 ${p.name} Chain Reaction!`,'log-system');
+				const alive=window.players.filter(o=>!o.eliminated);
+				const idx=alive.findIndex(o=>o.id===pidx);
+				const neighbors=[alive[idx-1],alive[idx+1]].filter(Boolean);
+				neighbors.forEach(t=>{
+					if(t.shield){addLog(`🛡 ${t.name}'s shield blocked Chain Reaction!`,'log-system');t.shield=false;syncPlayerState(t);}
+					else if(t.mirrorActive){t.mirrorActive=false;addLog(`🪞 ${t.name} reflected Chain Reaction!`,'log-system');p.hp=Math.max(0,p.hp-2);syncPlayerState(p);}
+					else{t.hp=Math.max(0,t.hp-2);addLog(`💥 ${t.name} takes 2 DMG!`,'log-system');if(t.char.id==="MB"){t.rage=Math.min(3,(t.rage||0)+1);}syncPlayerState(t);checkElimination(t);}
+				});
+				syncPlayerState(p); renderPlayerCards(); checkElimination(p);
+			}
+			else { addLog(`${p.name} activated ${p.char.name}'s ability!`,'log-system'); }
+			if(!['nq_detect','sp_trap','prof_link','tq_slam'].includes(key)) { syncPlayerState(p); renderPlayerCards(); }
+		}
+		window.useActive = useActive;
+
+		function openInventory() {
+			playAudio();
+			const player=window.players[window.currentPlayerIndex]; if(!player)return;
+			if(!player.abilities||player.abilities.length===0){
+				openModal(`<div class="m-title">🎒 Inventory</div><div class="m-sub">No ability cards yet! Land on an Ability or Choice tile to earn some.</div><button class="m-btn" onclick="playAudio();closeModal()">✕ Close</button>`);
+				return;
+			}
+			const rows=player.abilities.map((item,idx)=>`
+				<div class="inventory-item">
+					<div class="item-info">
+						<div class="item-name">${item.emoji||''} ${item.name||item}</div>
+						<div class="item-desc">${item.desc||''}</div>
+					</div>
+					<button class="inventory-use-btn" onclick="playAudio();useItem(${idx})">Use</button>
+				</div>`).join('');
+			openModal(`<div class="m-title">🎒 ${player.name}'s Ability Cards</div><div class="m-sub">Click "Use" to activate a card. Effects apply immediately and sync to Firebase.</div>${rows}<button class="m-btn" style="margin-top:8px;text-align:center" onclick="playAudio();closeModal()">✕ Close</button>`);
+		}
+		window.openInventory = openInventory;
+
+		function useItem(idx) {
+			const player=window.players[window.currentPlayerIndex];
+			const item=player.abilities.splice(idx,1)[0];
+			if (!item) return;
+			playAudio();
+			addLog(`${player.name} used ${item.emoji||''} ${item.name||item}!`,"log-system");
+			if(item.id==='healpool'){
+				player.hp=Math.min(player.maxHp,player.hp+5);
+				addLog(`💚 +5 HP! ${player.name} now at ${player.hp}/${player.maxHp}`,'log-win');
+			}
+			else if(item.id==='bubble'){player.shield=true;addLog(`🫧 ${player.name} is shielded! Next hit blocked.`,'log-system');}
+			else if(item.id==='mirror'){player.mirrorActive=true;addLog(`🪞 Mirror Shield ready! Next attack on ${player.name} reflected.`,'log-system');}
+			else if(item.id==='quackport'){player.pos=0;player.hp=Math.min(player.maxHp,player.hp+1);updateTokenPositions();addLog(`🌀 ${player.name} warped to Tile 0! +1 HP`,'log-system');}
+			else if(item.id==='warpwings'){player.doubleMoveNext=true;addLog(`🪽 ${player.name} gets double move on next roll!`,'log-system');}
+			else if(item.id==='dodge'){player.skipNext=true;addLog(`🍃 ${player.name}'s next Logic/Combat tile is skipped!`,'log-system');}
+			else if(item.id==='freeze'){closeModal();openTargetSelect(window.currentPlayerIndex,'sp_freeze');return;}
+			else if(item.id==='quackdrain'){closeModal();openTargetSelect(window.currentPlayerIndex,'drain');return;}
+			syncPlayerState(player);
+			if(window.currentRoomCode&&typeof window._fbUpdate==='function'){
+				window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}/players/${player.id}`),{hp:player.hp,shield:player.shield||false,mirrorActive:player.mirrorActive||false,pos:player.pos,doubleMoveNext:player.doubleMoveNext||false,skipNext:player.skipNext||false});
+			}
+			closeModal(); renderPlayerCards(); updateInvBtn();
+		}
+		window.useItem = useItem;
+
+		function openTargetSelect(pidx, context) {
+			const attacker=window.players[pidx];
+			const targets=window.players.filter(p=>!p.eliminated&&p.id!==pidx);
+			if (targets.length===0) { advanceTurn(); return; }
+			if (attacker.isAI&&context==='combatPick') { targets.sort((a,b)=>a.hp-b.hp); window.startCombatFlow(pidx,targets[0].id); return; }
+			if (context==='nq_reveal') {
+				const targetBtns=targets.map(t=>`<button class="m-btn" onclick="playAudio();nightquackReveal(${pidx},${t.id})">${t.char.emoji} ${t.name}</button>`).join('');
+				openModal(`<div class="m-title">🕵️ Interrogation</div><div class="m-sub">Reveal an opponent's ability cards:</div><div>${targetBtns}</div>`); return;
+			}
+			if (context==='sp_freeze') {
+				const targetBtns=targets.map(t=>`<button class="m-btn" onclick="playAudio();spiderTrap(${pidx},${t.id})">${t.char.emoji} ${t.name}</button>`).join('');
+				openModal(`<div class="m-title">🕸️ Sticky Trap!</div><div class="m-sub">Choose target to freeze (skip next turn):</div><div>${targetBtns}</div>`); return;
+			}
+			if (context==='prof_duel') {
+				const targetBtns=targets.map(t=>`<button class="m-btn" onclick="playAudio();profDuel(${pidx},${t.id})">${t.char.emoji} ${t.name}</button>`).join('');
+				openModal(`<div class="m-title">🎓 Mind Link!</div><div class="m-sub">Duel an opponent — pick target:</div><div>${targetBtns}</div>`); return;
+			}
+			if (context==='drain') {
+				const targetBtns=targets.map(t=>`<button class="m-btn" onclick="playAudio();drainTarget(${pidx},${t.id})">${t.char.emoji} ${t.name} (❤️ ${t.hp}/${t.maxHp})</button>`).join('');
+				openModal(`<div class="m-title">💧 Quack Drain</div><div class="m-sub">Drain 2 HP from chosen opponent (you gain 2 HP):</div><div>${targetBtns}</div>`); return;
+			}
+			if (targets.length===1&&context==='combatPick') { window.startCombatFlow(pidx,targets[0].id); return; }
+			const targetBtns=targets.map(t=>`<button class="m-btn m-btn-primary" onclick="playAudio();startCombatFlow(${pidx},${t.id})">${t.char.emoji} ${t.name} (${t.char.name}) — ❤️ ${t.hp}</button>`).join('');
+			openModal(`<div class="m-title">⚔️ ${context==='grandArena'?'Grand Arena':'Combat!'}</div><div class="m-sub">Choose your opponent:</div><div>${targetBtns}</div><button class="m-btn" style="margin-top:10px;text-align:center" onclick="playAudio();closeModal();advanceTurn()">🏃 Flee</button>`);
+		}
+		window.openTargetSelect = openTargetSelect;
+
+		window.nightquackReveal = function(pidx,tid){
+			closeModal();
+			const p=window.players[pidx];const t=window.players[tid];
+			const cards=t.abilities.length>0?t.abilities.map(a=>`${a.emoji||''} ${a.name}`).join(', '):"No ability cards!";
+			addLog(`🕵️ ${p.name} reveals ${t.name}'s cards: ${cards}`,'log-system');
+			syncPlayerState(p); renderPlayerCards();
+		};
+		window.spiderTrap = function(pidx,tid){
+			closeModal();
+			const p=window.players[pidx];const t=window.players[tid];
+			if(t.char.id==="SP"){addLog(`🕸️ ${t.name}'s Web Swing ignores Sticky Trap!`,'log-system');syncPlayerState(p);renderPlayerCards();return;}
+			// Apply -2 Move penalty to target's next roll (clamped so minimum move is 1)
+			t.movePenalty=(t.movePenalty||0)+2;
+			addLog(`🕸️ ${p.name} webbed ${t.name}! Their next roll gets -2 Move.`,'log-system');
+			if(window.currentRoomCode&&typeof window._fbUpdate==='function'){
+				window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}/players/${t.id}`),{movePenalty:t.movePenalty});
+			}
+			syncPlayerState(p);renderPlayerCards();advanceTurn();
+		};
+		window.profDuel = function(pidx,tid){closeModal();const p=window.players[pidx];addLog(`🎓 ${p.name} Mind Link vs ${window.players[tid].name}!`,'log-system');window.startCombatFlow(pidx,tid);};
+		window.drainTarget = function(pidx,tid){
+			closeModal();
+			const p=window.players[pidx];const t=window.players[tid];
+			if(t.shield){addLog(`🛡 ${t.name}'s shield blocked Quack Drain!`,'log-system');t.shield=false;syncPlayerState(t);renderPlayerCards();return;}
+			t.hp=Math.max(0,t.hp-2);p.hp=Math.min(p.maxHp,p.hp+2);
+			addLog(`💧 ${p.name} drained 2 HP from ${t.name}! (+2 HP to self)`,'log-system');
+			syncPlayerState(p);syncPlayerState(t);renderPlayerCards();checkElimination(t);advanceTurn();
+		};
+
+		window.displayTowerQuestion = function(pidx){
+			const player=window.players[pidx];
+			const q=generateComplexQuestion('logic','hard');
+			if(!q){advanceTurn();return;}
+			const overlay=document.createElement('div');overlay.className='question-overlay';
+			overlay.innerHTML=`<div class="question-card"><div class="tape-piece" style="background:#fff3cd">🧠 LOGIC TOWER</div><div class="question-prompt">${q.prompt}</div><div class="question-options" id="q-options"></div><div class="question-timer" id="q-timer-display" style="text-align:center;font-weight:900;color:var(--red-ink);font-size:1.1rem;margin-top:8px">⏱ 30</div></div>`;
+			document.body.appendChild(overlay);
+			const optContainer=overlay.querySelector('#q-options');
+			let answered=false;
+			const timerEl=overlay.querySelector('#q-timer-display');
+			let timeLeft=30;
+			const timerInterval=setInterval(()=>{
+				timeLeft--;
+				if(timerEl)timerEl.textContent=`⏱ ${timeLeft}`;
+				if(timeLeft<=0){
+					clearInterval(timerInterval);
+					if(!answered){
+						answered=true;
+						overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');});
+						addLog(`${player.name} ran out of time! -2 HP`,'log-lose');
+						setTimeout(()=>{overlay.remove();player.hp=Math.max(0,player.hp-2);addLog(`${player.name} got it wrong! -2 HP!`,'log-lose');renderPlayerCards();checkElimination(player);advanceTurn();},900);
+					}
+				}
+			},1000);
+			q.options.forEach(opt=>{
+				const btn=document.createElement('button');btn.className='question-opt-btn';btn.textContent=opt;
+				btn.onclick=()=>{
+					if(answered)return;
+					answered=true;
+					clearInterval(timerInterval);
+					playAudio();
+					const correct=opt===q.answer;
+					overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');else if(b===btn&&!correct)b.classList.add('wrong');});
+					setTimeout(()=>{overlay.remove();if(correct){player.pos=(player.pos+5)%tileCount;updateTokenPositions();addLog(`${player.name} answered correctly! +5 moves!`,'log-win');}else{player.hp=Math.max(0,player.hp-2);addLog(`${player.name} got it wrong! -2 HP!`,'log-lose');renderPlayerCards();checkElimination(player);}advanceTurn();},1000);
+				};
+				optContainer.appendChild(btn);
+			});
+		};
+
+		window.pickChoiceCard = function(pidx,idx){
+			const card=(window._choiceCards||[])[idx];
+			if(card){
+				window.players[pidx].abilities.push({...card,uid:Date.now()+Math.random()});
+				addLog(`${window.players[pidx].name} chose: ${card.emoji} ${card.name}!`,'log-system');
+				renderPlayerCards(); updateInvBtn();
+			}
+			closeModal(); advanceTurn();
+		};
+
+		function checkElimination(player) {
+			if(player.hp<=0&&!player.eliminated){
+				player.hp=0; player.eliminated=true;
+				if(player.element)player.element.style.opacity='0.3';
+				addLog(`💀 ${player.name} (${player.char.name}) has been eliminated!`,"log-system");
+				syncPlayerState(player); renderPlayerCards();
+				const remaining=window.players.filter(p=>!p.eliminated);
+				if(remaining.length===1) showWinner(remaining[0]);
+			}
+		}
+
+		function showWinner(player) {
+			playAudio();
+			const overlay=document.createElement("div"); overlay.className="winner-overlay";
+			overlay.innerHTML=`<div class="winner-card"><h1>🏆 Winner!</h1><p>${player.char.emoji} ${player.name} wins as ${player.char.name}!</p><button class="play-again-btn" onclick="playAudio();location.reload()">🔄 Play Again</button></div>`;
+			document.body.appendChild(overlay);
+		}
+
+		function endTurn() {
+			const alivePlayers=window.players.filter(p=>!p.eliminated); if(alivePlayers.length<=1) return;
+			let safetyCounter=0;
+			do { window.currentPlayerIndex=(window.currentPlayerIndex+1)%window.players.length; safetyCounter++; }
+			while(window.players[window.currentPlayerIndex].eliminated&&safetyCounter<window.players.length);
+			const p=window.players[window.currentPlayerIndex];
+			if (p) { p.firstHitThisRound=false; }
+			renderPlayerCards(); updateTurnBar(); updateInvBtn();
+			const aiThink=document.getElementById("ai-thinking"); if(aiThink) aiThink.style.display="none";
+			const rb=document.getElementById("roll-btn");
+			if (p&&p.frozenTurns>0) { p.frozenTurns--; addLog(`${p.name} is frozen! Skipping.`,'log-system'); setTimeout(()=>endTurn(),800); return; }
+			if (window.currentRoomCode) {
+				if (typeof window._fbUpdate==='function') window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}`),{currentTurnIndex:window.currentPlayerIndex});
+				if (rb) rb.disabled=(window.currentPlayerIndex!==window.mySlotIndex);
+			} else {
+				if (rb) rb.disabled=false;
+				if (p&&p.isAI) { if(rb)rb.disabled=true; if(aiThink)aiThink.style.display="block"; setTimeout(()=>doAITurn(),1200); }
+			}
+		}
+
+		function advanceTurn() {
+			if (window.rolling) return;
+			let nextIdx=(window.currentPlayerIndex+1)%window.players.length;
+			let count=0;
+			while(window.players[nextIdx]&&window.players[nextIdx].eliminated&&count<window.players.length){nextIdx=(nextIdx+1)%window.players.length;count++;}
+			if (window.currentRoomCode&&window.mySlotIndex===window.currentPlayerIndex) {
+				if (typeof window._fbUpdate==='function') window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}`),{currentTurnIndex:nextIdx});
+			}
+			window.currentPlayerIndex=nextIdx;
+			const p=window.players[nextIdx];
+			if (p) { p.firstHitThisRound=false; }
+			renderPlayerCards(); updateTurnBar(); updateInvBtn();
+			const rb=document.getElementById('roll-btn');
+			if (p&&p.isAI&&!window.currentRoomCode) { if(rb)rb.disabled=true; setTimeout(()=>doAITurn(),1000); }
+			else { if(rb)rb.disabled=(window.mySlotIndex!==-1&&nextIdx!==window.mySlotIndex); }
+		}
+		window.advanceTurn = advanceTurn;
+		window.doAIAbilityCheck = doAIAbilityCheck;
+
+		function doAITurn() {
+			const player=window.players[window.currentPlayerIndex];
+			if(!player||!player.isAI||player.eliminated){return;}
+			const aiThink=document.getElementById("ai-thinking"); if(aiThink)aiThink.style.display="block";
+			const d1=document.getElementById('dice1'),d2=document.getElementById('dice2');
+			setTimeout(()=>{
+				aiUseAbilityIfSmart(player);
+				if(player.inJail){
+					const r1=rollOne(d1),r2=rollOne(d2);
+					if(r1===r2){player.inJail=false;addLog(`🤖 ${player.name} rolled doubles and escaped Duck Jail!`,'log-win');window.rolling=true;movePlayerAnimated(window.currentPlayerIndex,r1+r2);}
+					else{addLog(`🤖 ${player.name} is still in jail.`,'log-system');if(aiThink)aiThink.style.display='none';advanceTurn();}
+					return;
+				}
+				if(player.frozenTurns>0){player.frozenTurns--;addLog(`🤖 ${player.name} is frozen! Skipping.`,'log-system');if(aiThink)aiThink.style.display='none';advanceTurn();return;}
+				const r1=rollOne(d1),r2=rollOne(d2);let total=r1+r2;
+				if(player.doubleMoveNext){total*=2;player.doubleMoveNext=false;}
+				if((player.movePenalty||0)>0){
+					const pen=player.movePenalty; player.movePenalty=0; total=Math.max(1,total-pen);
+					addLog(`🕸️ ${player.name} suffers Sticky Trap -${pen} Move!`,'log-lose');
+					if(window.currentRoomCode&&typeof window._fbUpdate==='function'){window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}/players/${player.id}`),{movePenalty:0});}
+				}
+				const dr=document.getElementById("dice-result");if(dr)dr.textContent=`🎲 ${r1}+${r2}=${total}`;
+				addLog(`🤖 ${player.name} rolled ${r1}+${r2}=${total}!`,'log-system');
+				if(aiThink)aiThink.style.display="none";
+				window.rolling=true; movePlayerAnimated(window.currentPlayerIndex,total);
+			},1500);
+		}
+
+		// ─── HELPER: tile distance between two positions on the 40-tile loop ───
+		function tileDistance(a, b) {
+			const diff = Math.abs(a - b);
+			return Math.min(diff, 40 - diff);
+		}
+
+		// ─── HELPER: sync AI active ability use to Firebase ───
+		function syncAIActiveToFirebase(player) {
+			if (!window.currentRoomCode) return;
+			if (typeof window._fbUpdate === 'function' && typeof window._fbRef === 'function') {
+				window._fbUpdate(window._fbRef(window._db, `rooms/${window.currentRoomCode}/players/${player.id}`), {
+					activeUsed: player.activeUsed,
+					splashActive: player.splashActive || false,
+					doubleMoveNext: player.doubleMoveNext || false,
+					skipNext: player.skipNext || false,
+					rage: player.rage || 0,
+					staticCharge: player.staticCharge || false,
+					hp: player.hp,
+					shield: player.shield || false,
+					mirrorActive: player.mirrorActive || false
+				});
+			}
+		}
+
+		// ─── PRIORITY 1: Smart AI Ability Logic ───────────────────────────────
+		function doAIAbilityCheck(player) {
+			if (player.activeUsed || player.eliminated) return;
+			const opponents = window.players.filter(o => !o.eliminated && o.id !== player.id);
+			if (opponents.length === 0) return;
+			const charId = player.char.id;
+			const currentTile = window.tileMap[player.pos];
+
+			// ── DuckDash (D2): Speed Burst if >10 tiles from every opponent ──
+			if (charId === 'D2') {
+				const allFar = opponents.every(o => tileDistance(player.pos, o.pos) > 10);
+				if (allFar) {
+					player.activeUsed = true;
+					player.doubleMoveNext = true;
+					addLog(`🤖⚡ ${player.name} (Speed Burst) — all opponents are far away! Next roll is doubled.`, 'log-system');
+					syncAIActiveToFirebase(player);
+					renderPlayerCards();
+				}
+				return;
+			}
+
+			// ── Mibibe (MB): SMASH!!! if rage ≥ 2 AND an opponent is within 5 tiles ──
+			if (charId === 'MB') {
+				const rageReady = (player.rage || 0) >= 2;
+				const nearOpponent = opponents.find(o => tileDistance(player.pos, o.pos) <= 5);
+				if (rageReady && nearOpponent) {
+					player.activeUsed = true;
+					const dmg = player.rage; player.rage = 0;
+					let target = nearOpponent;
+					if (target.shield) {
+						addLog(`🛡 ${target.name}'s shield blocked Mibibe's SMASH!!!`, 'log-system');
+						target.shield = false; syncPlayerState(target);
+					} else if (target.mirrorActive) {
+						target.mirrorActive = false;
+						addLog(`🪞 ${target.name} reflected SMASH!!! back at Mibibe!`, 'log-system');
+						player.hp = Math.max(0, player.hp - dmg);
+						addLog(`💥 ${player.name} takes ${dmg} reflected DMG!`, 'log-system');
+						syncPlayerState(player); checkElimination(player);
+					} else {
+						target.hp = Math.max(0, target.hp - dmg);
+						if (target.char.id === 'MB') { target.rage = Math.min(3, (target.rage || 0) + 1); }
+						addLog(`🤖😡 ${player.name} SMASH!!! ${dmg} DMG to ${target.name}! (Rage depleted)`, 'log-system');
+						syncPlayerState(target); checkElimination(target);
+					}
+					syncAIActiveToFirebase(player);
+					renderPlayerCards();
+				}
+				return;
+			}
+
+			// ── Waterfowl (WF): Splash Attack if any opponent HP < 50% ──
+			if (charId === 'WF') {
+				const lowHpOpponent = opponents.find(o => o.hp < o.maxHp * 0.5);
+				if (lowHpOpponent) {
+					player.activeUsed = true;
+					player.splashActive = true;
+					addLog(`🤖💧 ${player.name} (Splash Attack) — ${lowHpOpponent.name} is low HP! Next enemy fail deals +1 DMG.`, 'log-system');
+					syncAIActiveToFirebase(player);
+					renderPlayerCards();
+				}
+				return;
+			}
+
+			// ── Nightquack (NQ): Interrogation if landed on a Logic tile ──
+			if (charId === 'NQ') {
+				if (currentTile && currentTile.type === 'logic') {
+					player.activeUsed = true;
+					// Reveal a random opponent's ability cards
+					const target = opponents[Math.floor(Math.random() * opponents.length)];
+					const cards = target.abilities.length > 0 ? target.abilities.map(a => `${a.emoji || ''} ${a.name}`).join(', ') : 'No ability cards';
+					addLog(`🤖🕵️ ${player.name} (Interrogation) reveals ${target.name}'s hand: ${cards}`, 'log-system');
+					syncAIActiveToFirebase(player);
+					renderPlayerCards();
+				}
+				return;
+			}
+
+			// ── Thunderquack (TQ): Thunder Slam if ≥2 opponents within 5 tiles ──
+			if (charId === 'TQ') {
+				const nearOpponents = opponents.filter(o => tileDistance(player.pos, o.pos) <= 5);
+				if (nearOpponents.length >= 2) {
+					player.activeUsed = true;
+					addLog(`🤖⚡ ${player.name} (Thunder Slam) — AOE Logic Check on ${nearOpponents.length} nearby opponents!`, 'log-system');
+					const q = generateComplexQuestion('combat', 'medium');
+					nearOpponents.forEach(t => {
+						const ans = getAIAnswer(q);
+						if (ans !== q.answer) {
+							if (t.shield) { addLog(`🛡 ${t.name}'s shield blocked Thunder Slam!`, 'log-system'); t.shield = false; syncPlayerState(t); }
+							else { t.hp = Math.max(0, t.hp - 2); addLog(`⚡ ${t.name} caught in Thunder Slam! -2 HP`, 'log-system'); if (t.char.id === 'MB') { t.rage = Math.min(3, (t.rage || 0) + 1); } syncPlayerState(t); checkElimination(t); }
+						} else { addLog(`⚡ ${t.name} answered correctly, dodged Thunder Slam!`, 'log-win'); }
+					});
+					syncAIActiveToFirebase(player);
+					renderPlayerCards();
+				}
+				return;
+			}
+
+			// ── Spiderduck (SP): Sticky Trap on the leader OR opponent within 3 tiles of GO/corner ──
+			if (charId === 'SP') {
+				const cornerTiles = [0, 10, 20, 30];
+				// Find leader (highest tile ID among opponents)
+				const leader = opponents.reduce((best, o) => (o.pos > best.pos ? o : best), opponents[0]);
+				// Find opponent within 3 tiles of any corner
+				const nearCornerOpp = opponents.find(o => cornerTiles.some(c => tileDistance(o.pos, c) <= 3));
+				const target = nearCornerOpp || leader;
+				if (target) {
+					player.activeUsed = true;
+					// Apply -2 Move penalty: reduce their next roll by 2 (clamped ≥ 1)
+					target.movePenalty = (target.movePenalty || 0) + 2;
+					const reason = nearCornerOpp ? `near corner tile ${target.pos}` : `in the lead (Tile ${target.pos})`;
+					addLog(`🤖🕸️ ${player.name} (Sticky Trap) on ${target.name} [${reason}]! -2 Move on their next roll.`, 'log-system');
+					syncAIActiveToFirebase(player);
+					if (window.currentRoomCode && typeof window._fbUpdate === 'function') {
+						window._fbUpdate(window._fbRef(window._db, `rooms/${window.currentRoomCode}/players/${target.id}`), { movePenalty: target.movePenalty });
+					}
+					renderPlayerCards();
+				}
+				return;
+			}
+
+			// ── Professor Quack (PF): Mind Link if on Logic Tile or Logic Tower ──
+			if (charId === 'PF') {
+				const onLogicTile = currentTile && (currentTile.type === 'logic' || currentTile.name === 'Logic Tower');
+				if (onLogicTile) {
+					player.activeUsed = true;
+					// AI picks weakest opponent for the duel
+					const weakest = opponents.reduce((w, o) => (o.hp < w.hp ? o : w), opponents[0]);
+					addLog(`🤖🎓 ${player.name} (Mind Link) — Logic Tile activated! Dueling ${weakest.name}!`, 'log-system');
+					syncAIActiveToFirebase(player);
+					renderPlayerCards();
+					// Trigger the duel (AI attacker vs weakest)
+					setTimeout(() => window.startCombatFlow(player.id, weakest.id), 600);
+				}
+				return;
+			}
+
+			// ── Dynaduck (BK): Chain Reaction if HP ≥ 2 AND adjacent to an opponent ──
+			if (charId === 'BK') {
+				const alive = window.players.filter(o => !o.eliminated);
+				const idx = alive.findIndex(o => o.id === player.id);
+				const neighbors = [alive[idx - 1], alive[idx + 1]].filter(Boolean);
+				const adjOpponent = neighbors.find(n => n.id !== player.id);
+				if (player.hp >= 2 && adjOpponent) {
+					player.activeUsed = true;
+					addLog(`🤖🧨 ${player.name} (Chain Reaction) — adjacent to ${adjOpponent.name}! Detonating!`, 'log-system');
+					neighbors.forEach(t => {
+						if (t.id === player.id) return;
+						if (t.shield) { addLog(`🛡 ${t.name}'s shield blocked Chain Reaction!`, 'log-system'); t.shield = false; syncPlayerState(t); }
+						else if (t.mirrorActive) { t.mirrorActive = false; addLog(`🪞 ${t.name} reflected Chain Reaction!`, 'log-system'); player.hp = Math.max(0, player.hp - 2); syncPlayerState(player); }
+						else { t.hp = Math.max(0, t.hp - 2); addLog(`💥 ${t.name} takes 2 DMG from Chain Reaction!`, 'log-system'); if (t.char.id === 'MB') { t.rage = Math.min(3, (t.rage || 0) + 1); } syncPlayerState(t); checkElimination(t); }
+					});
+					syncAIActiveToFirebase(player);
+					syncPlayerState(player);
+					renderPlayerCards();
+					checkElimination(player);
+				}
+				return;
+			}
+		}
+
+		function aiUseAbilityIfSmart(player) {
+			// First run the character-specific active ability check
+			doAIAbilityCheck(player);
+			// Then handle inventory cards (healing, shields, etc.)
+			if (player.abilities.length === 0) return;
+			const heal = player.abilities.find(a => a.id === 'healpool');
+			if (heal && player.hp <= player.maxHp * 0.4) { useAIAbility(player, heal); return; }
+			const bubble = player.abilities.find(a => a.id === 'bubble');
+			if (bubble && player.hp <= player.maxHp * 0.5 && !player.shield) { useAIAbility(player, bubble); return; }
+			const mirror = player.abilities.find(a => a.id === 'mirror');
+			if (mirror && player.hp <= player.maxHp * 0.35 && !player.mirrorActive) { useAIAbility(player, mirror); return; }
+		}
+
+		function useAIAbility(player, item) {
+			player.abilities = player.abilities.filter(a => a !== item);
+			if (item.id === 'healpool') { player.hp = Math.min(player.maxHp, player.hp + 5); addLog(`🤖 ${player.name} used Healing Splash! +5 HP`, 'log-system'); }
+			if (item.id === 'bubble') { player.shield = true; addLog(`🤖 ${player.name} used Bubble Armor!`, 'log-system'); }
+			if (item.id === 'mirror') { player.mirrorActive = true; addLog(`🤖 ${player.name} used Mirror Shield!`, 'log-system'); }
+			syncPlayerState(player); renderPlayerCards();
+		}
+
+		function getAIAnswer(questionObj) {
+			const correct=Math.random()<0.65;
+			if(correct)return questionObj.answer;
+			return questionObj.options.find(o=>o!==questionObj.answer)||questionObj.answer;
+		}
+
+		function openModal(html) {
+			window.pendingModal=true;
+			const mo=document.getElementById('modal-overlay'),mb=document.getElementById('modal-box');
+			mb.innerHTML=html; mo.style.display='flex';
+			const rb=document.getElementById('roll-btn');if(rb)rb.disabled=true;
+		}
+		function closeModal() {
+			const mo=document.getElementById('modal-overlay');if(mo)mo.style.display='none';
+			const mb=document.getElementById('modal-box');if(mb)mb.innerHTML='';
+			window.pendingModal=null;
+			const rb=document.getElementById('roll-btn');
+			if(rb&&!window.players[window.currentPlayerIndex]?.isAI){rb.disabled=(window.mySlotIndex!==-1&&window.currentPlayerIndex!==window.mySlotIndex);}
+		}
+		window.openModal=openModal; window.closeModal=closeModal;
+		window.closeModalAndAdvance=function(pidx){closeModal();advanceTurn();};
+
+		function syncRageToFirebase(player) {
+			if (!window.currentRoomCode||player.id!==window.mySlotIndex) return;
+			if (typeof window._fbUpdate==='function') window._fbUpdate(window._fbRef(window._db,`rooms/${window.currentRoomCode}/players/${player.id}`),{rage:player.rage});
+		}
+
+		createDice(document.getElementById('dice1'));
+		createDice(document.getElementById('dice2'));
+		window.addEventListener('resize', updateTokenPositions);
+	</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getDatabase, ref, set, get, update, onValue, onDisconnect, push } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+
+const firebaseConfig = {
+	apiKey:"AIzaSyDs9IEwtoI5V4yaW0p-1bj4uBalmfIV9S0",
+	authDomain:"ducking-around.firebaseapp.com",
+	databaseURL:"https://ducking-around-default-rtdb.asia-southeast1.firebasedatabase.app",
+	projectId:"ducking-around",
+	storageBucket:"ducking-around.firebasestorage.app",
+	messagingSenderId:"511373749423",
+	appId:"1:511373749423:web:937812ffa0b2111172385a",
+	measurementId:"G-N1BEMC54S5"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window._db=db; window._fbRef=ref; window._fbUpdate=update;
+
+window.showJoinUI = function() {
+	playAudio();
+	document.getElementById('join-ui').style.display='flex';
+};
+
+window.createRoom = async function() {
+	playAudio();
+	const nameInput=document.getElementById('global-player-name');
+	const finalName=(nameInput&&nameInput.value.trim())?nameInput.value.trim():"Host Duck";
+	const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	const code=Array.from({length:6},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+	window.currentRoomCode=code; window.isHost=true; window.mySlotIndex=0;
+	try {
+		const roomRef=ref(db,'rooms/'+code);
+		onDisconnect(roomRef).update({hostLeft:true}).catch(e=>console.warn(e));
+		await set(roomRef,{code,state:'lobby',players:[{name:finalName,index:0}],createdAt:Date.now(),logs:{}});
+		document.getElementById('room-display').style.display='block';
+		document.getElementById('room-code-text').textContent=code;
+		document.getElementById('start-room-btn').style.display='block';
+		listenToRoom(code);
+	} catch(e){console.error(e);alert("Database error: Could not create room.");}
+};
+
+window.joinRoom = async function() {
+	playAudio();
+	const codeInput=document.getElementById('join-code-input');
+	const code=codeInput?codeInput.value.trim().toUpperCase():"";
+	const nameInput=document.getElementById('global-player-name');
+	const finalName=(nameInput&&nameInput.value.trim())?nameInput.value.trim():"Guest Duck";
+	if(code.length!==6)return alert("Enter 6-character code");
+	try {
+		const roomRef=ref(db,'rooms/'+code);
+		const snapshot=await get(roomRef);
+		if(snapshot.exists()){
+			const room=snapshot.val();
+			const isDupe=room.players.some(p=>p.name.toLowerCase()===finalName.toLowerCase());
+			if(isDupe)return alert("Name taken! Choose another.");
+			window.mySlotIndex=room.players.length;
+			const updatedPlayers=[...room.players,{name:finalName,index:window.mySlotIndex}];
+			await update(roomRef,{players:updatedPlayers});
+			window.currentRoomCode=code; window.isHost=false;
+			document.getElementById('room-display').style.display='block';
+			document.getElementById('room-code-text').textContent=code;
+			document.getElementById('join-ui').style.display='none';
+			listenToRoom(code);
+		} else alert("Room not found!");
+	} catch(e){console.error(e);}
+};
+
+window.syncNameChange = async function() {
+	playAudio();
+	const newName=document.getElementById('global-player-name').value.trim();
+	const code=window.currentRoomCode;
+	if(!code||window.mySlotIndex===-1)return;
+	try {
+		const roomRef=ref(db,'rooms/'+code);
+		const snapshot=await get(roomRef);
+		if(snapshot.exists()){
+			const data=snapshot.val();
+			const isDupe=data.players.some((p,i)=>i!==window.mySlotIndex&&p.name.toLowerCase()===newName.toLowerCase());
+			if(isDupe){alert("That name is already taken!");return;}
+			const updatedPlayers=[...data.players];
+			if(updatedPlayers[window.mySlotIndex]){
+				updatedPlayers[window.mySlotIndex].name=newName||"Duck";
+				await update(roomRef,{players:updatedPlayers});
+				const s=document.getElementById('lobby-status');
+				if(s){s.textContent="✅ Name Updated!";setTimeout(()=>{s.textContent="";},2000);}
+			}
+		}
+	} catch(e){console.error(e);}
+};
+
+window.startRoomGame = async function() {
+	playAudio();
+	if(!window.isHost||!window.currentRoomCode)return;
+	const roomRef=ref(db,'rooms/'+window.currentRoomCode);
+	const snapshot=await get(roomRef);
+	if(snapshot.exists()){
+		const data=snapshot.val();
+		const initialTileMap=buildTileMap();
+		const finalNames=data.players.map(p=>p.name);
+		const assignedDucks=[...ALL_CHARS].sort(()=>Math.random()-0.5).slice(0,data.players.length).map(d=>d.id);
+		const hp=window.gameMode==='blitz'?8:window.gameMode==='endurance'?24:16;
+		const initialPlayerStates=data.players.map((_,i)=>({pos:0,hp,inJail:false,rage:0,staticCharge:false,activeUsed:false,eliminated:false,splashActive:false,shield:false,mirrorActive:false,skipNext:false,doubleMoveNext:false,frozenTurns:0}));
+		await update(roomRef,{state:'playing',tileMap:initialTileMap,assignedDucks,syncedNames:finalNames,numPlayers:data.players.length,gameMode:window.gameMode,hp,currentTurnIndex:0,players:initialPlayerStates,logs:{}});
+	}
+};
+
+function listenToRoom(code) {
+	const roomRef=ref(db,'rooms/'+code);
+	let lastLogKey=null;
+	onValue(roomRef,(snapshot)=>{
+		const data=snapshot.val();
+		if(!data){
+			if(!window.isHost){alert("Room closed by host.");window.location.reload();}
+			return;
+		}
+		if(data.hostLeft&&!window.isHost){
+			const list=document.getElementById('lobby-players-list');
+			if(list&&data.players&&data.players.length>1){
+				const newHostIdx=1;
+				if(window.mySlotIndex===newHostIdx){
+					window.isHost=true; window.mySlotIndex=0;
+					update(ref(db,'rooms/'+code),{hostLeft:false});
+					alert("The host left. You are now the host!");
+				}
+			}
+			return;
+		}
+		const playersArr=data.players||[];
+		const list=document.getElementById('lobby-players-list');
+		if(list&&playersArr.length>0){
+			list.innerHTML=playersArr.map((p,i)=>{
+				if(!p)return'';
+				const isMe=(i===window.mySlotIndex);
+				return`<div class="lobby-player-row animate__animated animate__fadeIn"><span>${i===0?'👑':'🦆'}</span><b style="${isMe?'color:var(--blue-ink)':''}">${p.name}</b>${isMe?'<small>(YOU)</small>':''}</div>`;
+			}).join('');
+		}
+		const startBtn=document.getElementById('start-room-btn');
+		if(startBtn&&window.isHost&&data.state!=='playing'){startBtn.style.display='block';startBtn.textContent=`🎮 Start Game (${playersArr.length} Players)`;}
+		else if(startBtn&&data.state==='playing'){startBtn.style.display='none';}
+
+		if(data.logs&&window.gameStarted){
+			const logKeys=Object.keys(data.logs).sort();
+			logKeys.forEach(k=>{
+				if(!window._seenLogKeys)window._seenLogKeys={};
+				if(!window._seenLogKeys[k]){
+					window._seenLogKeys[k]=true;
+					const entry=data.logs[k];
+					if(entry&&entry.text){
+						const logEl=document.getElementById("battle-log");
+						if(logEl){
+							const div=document.createElement("div");
+							div.className="log-entry "+(entry.type||"");
+							div.textContent=entry.text;
+							logEl.appendChild(div);
+							logEl.scrollTop=logEl.scrollHeight;
+						}
+					}
+				}
+			});
+		}
+
+		if(data.state==='playing') handleLiveGameSync(data);
+	});
+}
+
+function handleLiveGameSync(data) {
+	if(!window.gameStarted&&data.state==='playing'&&data.tileMap&&data.assignedDucks){
+		window.gameStarted=true;
+		window.numPlayers=data.numPlayers;
+		window.gameMode=data.gameMode;
+		window.tileMap=data.tileMap;
+		window.board=buildBoard(window.tileMap);
+		const syncedDucks=data.assignedDucks.map(id=>ALL_CHARS.find(c=>c.id===id));
+		window._seenLogKeys={};
+		window.startRollWithDucks(syncedDucks,data.hp,data.syncedNames);
+	}
+	if(data.currentTurnIndex!==undefined&&window.currentPlayerIndex!==data.currentTurnIndex){
+		window.currentPlayerIndex=data.currentTurnIndex;
+		if(window.players.length>0){
+			const p=window.players[window.currentPlayerIndex];
+			if(p)p.firstHitThisRound=false;
+			renderPlayerCards(); updateTurnBar(); updateInvBtn();
+			const rb=document.getElementById('roll-btn');
+			if(rb)rb.disabled=(window.currentPlayerIndex!==window.mySlotIndex);
+			if(window.players[window.currentPlayerIndex]){addLog(`📢 It's ${window.players[window.currentPlayerIndex].name}'s turn!`,'log-system');}
+		}
+	}
+	if(data.players&&window.players.length>0){
+		data.players.forEach((dbP,i)=>{
+			if(window.players[i]&&i!==window.mySlotIndex){
+				window.players[i].pos=dbP.pos||0;
+				window.players[i].hp=dbP.hp!==undefined?dbP.hp:window.players[i].hp;
+				window.players[i].inJail=dbP.inJail||false;
+				window.players[i].rage=dbP.rage||0;
+				window.players[i].staticCharge=dbP.staticCharge||false;
+				window.players[i].activeUsed=dbP.activeUsed||false;
+				window.players[i].splashActive=dbP.splashActive||false;
+				window.players[i].shield=dbP.shield||false;
+				window.players[i].mirrorActive=dbP.mirrorActive||false;
+				window.players[i].skipNext=dbP.skipNext||false;
+				window.players[i].doubleMoveNext=dbP.doubleMoveNext||false;
+				window.players[i].frozenTurns=dbP.frozenTurns||0;
+				window.players[i].movePenalty=dbP.movePenalty||0;
+				if(dbP.eliminated&&!window.players[i].eliminated){window.players[i].eliminated=true;if(window.players[i].element)window.players[i].element.style.opacity='0.3';}
+			}
+		});
+		updateTokenPositions(); renderPlayerCards();
+	}
+	if(data.quackQuestion&&!window._quackShown){
+		window._quackShown=true;
+		const q=data.quackQuestion;
+		const myP=window.players[window.mySlotIndex];
+		if(myP&&!myP.eliminated){
+			if(myP.isAI){
+				const ans=getAIAnswer({answer:q.answer,options:q.options||["TRUE","FALSE","Undetermined"]});
+				update(ref(db,`rooms/${window.currentRoomCode}/quackResponses/${window.mySlotIndex}`),{answer:ans,name:myP.name});
+			} else {
+				const overlay=document.createElement("div"); overlay.className="question-overlay";
+				overlay.innerHTML=`<div class="question-card"><div class="tape-piece" style="background:#f4e04d;color:#2c2416">🎲 QUACK FOR ALL</div><div style="text-align:center;font-size:0.75rem;color:var(--ink3);margin-top:18px;margin-bottom:4px;font-weight:700">Everyone answers — wrong = -2 HP</div><div class="question-prompt">${q.prompt}</div><div class="question-options" id="q-options"></div><div class="question-timer" id="q-timer-display" style="text-align:center;font-weight:900;color:var(--red-ink);font-size:1.1rem;margin-top:8px">⏱ 30</div></div>`;
+				document.body.appendChild(overlay);
+				const optContainer=overlay.querySelector("#q-options");
+				let answered=false;
+				const timerEl=overlay.querySelector('#q-timer-display');
+				let timeLeft=30;
+				const timerInterval=setInterval(()=>{
+					timeLeft--;
+					if(timerEl)timerEl.textContent=`⏱ ${timeLeft}`;
+					if(timeLeft<=0){
+						clearInterval(timerInterval);
+						if(!answered){
+							answered=true;
+							overlay.querySelectorAll('.question-opt-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');});
+							addLog(`${myP.name} ran out of time!`,'log-system');
+							update(ref(db,`rooms/${window.currentRoomCode}/quackResponses/${window.mySlotIndex}`),{answer:"__TIMEOUT__",name:myP.name});
+							setTimeout(()=>overlay.remove(),900);
+						}
+					}
+				},1000);
+				(q.options||["TRUE","FALSE","Undetermined"]).forEach(opt=>{
+					const btn=document.createElement("button"); btn.className="question-opt-btn"; btn.textContent=opt;
+					btn.onclick=()=>{
+						if(answered)return;
+						answered=true;
+						clearInterval(timerInterval);
+						playAudio();
+						overlay.querySelectorAll('.question-opt-btn').forEach(b=>b.disabled=true);
+						btn.style.background='var(--yellow-hl)';
+						update(ref(db,`rooms/${window.currentRoomCode}/quackResponses/${window.mySlotIndex}`),{answer:opt,name:myP.name});
+						addLog(`You answered: ${opt}`,'log-system');
+						setTimeout(()=>overlay.remove(),1500);
+					};
+					optContainer.appendChild(btn);
+				});
+			}
+		}
+	}
+	if(data.quackResponses&&data.quackQuestion){
+		const responseCount=Object.keys(data.quackResponses).length;
+		const aliveCount=window.players.filter(p=>!p.eliminated).length;
+		if(window.isHost&&responseCount>=aliveCount&&!data.quackResultsReady){
+			update(ref(db,`rooms/${window.currentRoomCode}`),{quackResultsReady:true});
+		}
+	}
+	if(data.quackResultsReady&&window._quackShown){
+		window._quackShown=false;
+		if(window.isHost){
+			const responses=data.quackResponses||{};
+			const q=data.quackQuestion;
+			Object.entries(responses).forEach(([slotIdx,resp])=>{
+				const p=window.players[parseInt(slotIdx)];
+				if(!p||p.eliminated)return;
+				const correct=resp.answer===q.answer;
+				addLog(`${resp.name}: ${resp.answer} — ${correct?'✅':'❌'}`,correct?'log-win':'log-lose');
+				if(!correct){
+					p.hp=Math.max(0,p.hp-2);
+					update(ref(db,`rooms/${window.currentRoomCode}/players/${slotIdx}`),{hp:p.hp});
+					checkElimination(p);
+				}
+			});
+			renderPlayerCards();
+			update(ref(db,`rooms/${window.currentRoomCode}`),{
+				quackQuestion:null,quackResponses:null,quackResultsReady:false,
+				currentTurnIndex:(window.currentPlayerIndex+1)%window.numPlayers
+			});
+		}
+	}
+}
+</script>
+</body>
+</html>
