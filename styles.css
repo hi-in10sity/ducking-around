@@ -667,6 +667,28 @@ body::before {
 	.question-card { padding: 22px 16px; max-width: 96vw; }
 }
 
+@media (max-width: 768px) {
+	.game-right { 
+		width: 100%; 
+		flex-direction: column; /* Force vertical stacking */
+		height: auto; 
+		overflow-y: visible; 
+		border-top: 2px dashed var(--line); 
+		gap: 15px; /* Add space between SOO and Log */
+	}
+
+	.soo-wrap { 
+		width: 100%; 
+		margin-bottom: 10px; 
+	}
+
+	.panel { 
+		width: 100%; 
+		min-height: 200px; /* Give the log some vertical space */
+		max-height: 300px; 
+	}
+}
+
 /* ============================================================
    RESPONSIVE — 480px (phones)
    ============================================================ */
@@ -776,4 +798,18 @@ body::before {
 	.dice .side:nth-child(5) { transform: rotateX(90deg) translateZ(20px); }
 	.dice .side:nth-child(6) { transform: rotateX(-90deg) translateZ(20px); }
 	.roll-btn { padding: 6px 14px; font-size: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+    .game-right {
+        flex-direction: column;
+    }
+
+    .soo-rels {
+        font-size: 0.65rem;
+    }
+
+    .panel {
+        min-height: 180px;
+    }
 }
