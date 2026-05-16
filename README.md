@@ -28,4 +28,3 @@ Don't forget to read through the **RULES** and **DUCKS** section before starting
 ## ⚠️ BUGS/COMING SOON
 * Again, **multiplayer** is currently tweaking. I hate multiplayer servers - Steph
 * Some active abilities are wrong... 😨 more like Spiderduck is just the hated child... fixing that ASAP!
-* The website is not fully responsive! Oops! Play on your laptop (for now).
